@@ -1,0 +1,21 @@
+---
+import { TemplateGallery } from '@/components/template-gallery'
+import MainLayout from '@/layouts/main.astro'
+---
+
+<MainLayout
+  description="Nore OG is a self-hosted Open Graph image generator with templates, content presets, and SVG or PNG downloads."
+  title="Nore OG">
+  <main class="h-svh min-h-0 overflow-hidden">
+    <TemplateGallery client:only="react" locale="en-US" />
+  </main>
+</MainLayout>
+
+<style is:global>
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+</style>

@@ -1,0 +1,46 @@
+---
+import GeistLatin from '@/components/astro/effects/geist-latin.astro'
+import GoogleAnalytics from '@/components/astro/effects/google-analytics.astro'
+import ThemeInit from '@/components/astro/effects/theme-init.astro'
+import '../styles/global.css'
+
+interface Props {
+  readonly criticalFontDisabled?: boolean
+  readonly description?: string
+  readonly googleAnalyticsMeasurementId?: string
+  readonly lang?: string
+  readonly title?: string
+}
+
+const {
+  criticalFontDisabled = false,
+  description = 'Preview and render self-hosted Open Graph images with Nore OG.',
+  googleAnalyticsMeasurementId = import.meta.env
+    .PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID,
+  lang = 'en-US',
+  title = 'Nore OG',
+} = Astro.props
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/logo/logo.svg" />
+    <meta name="theme-color" content="#ffffff" />
+    <ThemeInit />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    {
+      googleAnalyticsMeasurementId ? (
+        <GoogleAnalytics measurementId={googleAnalyticsMeasurementId} />
+      ) : null
+    }
+    {criticalFontDisabled ? null : <GeistLatin />}
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

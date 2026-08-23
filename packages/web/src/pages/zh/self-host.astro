@@ -1,0 +1,94 @@
+---
+import { ThemeToggle } from '@/components/theme-toggle'
+import MainLayout from '@/layouts/main.astro'
+---
+
+<MainLayout
+  description="使用 Docker 与 Cloudflare Workers 自行部署 Nore OG。"
+  lang="zh-CN"
+  title="自部署 · Nore OG">
+  <header class="border-b">
+    <nav
+      aria-label="主导航"
+      class="mx-auto flex h-14 w-full max-w-4xl items-center justify-between px-4">
+      <a class="flex items-center gap-2.5" href="/zh">
+        <img
+          alt="Nore OG"
+          class="size-7 rounded-md"
+          height="28"
+          src="/logo/logo.svg"
+          width="28"
+        />
+        <span class="hidden text-sm font-medium sm:inline">Nore OG</span>
+      </a>
+      <div class="flex items-center gap-1 text-xs">
+        <a
+          class="rounded-md px-2.5 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          href="/zh">
+          首页
+        </a>
+        <a
+          class="rounded-md px-2.5 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          href="/zh/how">
+          如何使用
+        </a>
+        <a
+          aria-current="page"
+          class="rounded-md px-2.5 py-1.5 font-medium"
+          href="/zh/self-host">
+          自部署
+        </a>
+        <a
+          class="rounded-md px-2.5 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          href="/self-host">
+          EN
+        </a>
+        <ThemeToggle locale="zh-CN" />
+      </div>
+    </nav>
+  </header>
+
+  <main class="mx-auto w-full max-w-4xl px-4 py-16 sm:py-24">
+    <div class="max-w-2xl">
+      <p class="font-mono text-xs text-muted-foreground">SELF-HOST</p>
+      <h1 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+        在自己的基础设施上运行 Nore OG
+      </h1>
+      <p class="mt-5 text-sm leading-6 text-muted-foreground">
+        Nore OG 由独立的 Node.js 渲染 API 和 Astro 前端组成。API 可以通过 Docker
+        运行，前端默认部署到 Cloudflare Workers。
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-10">
+      <section>
+        <h2 class="text-sm font-medium">1. 部署渲染 API</h2>
+        <p class="mt-2 text-sm leading-6 text-muted-foreground">
+          在仓库根目录构建并运行 Docker 镜像：
+        </p>
+        <pre
+          class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker build -t nore-og-api .
+docker run --rm -p 3003:3003 nore-og-api</code></pre>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-medium">2. 配置网页前端</h2>
+        <p class="mt-2 text-sm leading-6 text-muted-foreground">
+          将公开 API 地址写入 Web 包的构建环境变量，地址末尾无需添加斜杠：
+        </p>
+        <pre
+          class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>PUBLIC_API_BASE_URL=https://og-api.example.com</code></pre>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-medium">3. 部署 Astro 前端</h2>
+        <p class="mt-2 text-sm leading-6 text-muted-foreground">
+          安装依赖后，从仓库根目录运行现有部署脚本：
+        </p>
+        <pre
+          class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>pnpm install
+pnpm deploy</code></pre>
+      </section>
+    </div>
+  </main>
+</MainLayout>

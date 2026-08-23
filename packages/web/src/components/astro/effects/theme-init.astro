@@ -1,0 +1,80 @@
+<script is:inline>
+  ;(() => {
+    const storageKey = 'nore-og:theme'
+    const isPreference = value => value === 'light' || value === 'dark'
+    const readPreference = () => {
+      try {
+        const storedPreference = localStorage.getItem(storageKey)
+        return isPreference(storedPreference) ? storedPreference : 'light'
+      } catch {
+        return 'light'
+      }
+    }
+    const syncControls = preference => {
+      const nextPreference = preference === 'dark' ? 'light' : 'dark'
+      document.querySelectorAll('[data-theme-toggle]').forEach(control => {
+        if (!(control instanceof HTMLButtonElement)) return
+        const label =
+          nextPreference === 'dark'
+            ? control.dataset.darkLabel
+            : control.dataset.lightLabel
+        if (label) {
+          control.setAttribute('aria-label', label)
+          control.title = label
+        }
+        control.dataset.theme = preference
+      })
+    }
+    const apply = preference => {
+      const root = document.documentElement
+      root.classList.toggle('dark', preference === 'dark')
+      root.dataset.theme = preference
+      root.style.colorScheme = preference
+      const themeColor = document.querySelector('meta[name="theme-color"]')
+      if (themeColor) {
+        themeColor.setAttribute(
+          'content',
+          preference === 'dark' ? '#171717' : '#ffffff',
+        )
+      }
+      syncControls(preference)
+    }
+    const setPreference = preference => {
+      if (!isPreference(preference)) return
+      try {
+        localStorage.setItem(storageKey, preference)
+      } catch {
+        // The current page still receives the in-memory preference.
+      }
+      apply(preference)
+    }
+
+    document.addEventListener('click', event => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      const control = target.closest('[data-theme-toggle]')
+      if (!(control instanceof HTMLButtonElement)) return
+      const nextPreference = document.documentElement.classList.contains('dark')
+        ? 'light'
+        : 'dark'
+      setPreference(nextPreference)
+    })
+    window.addEventListener('storage', event => {
+      if (event.key !== storageKey) return
+      apply(readPreference())
+    })
+
+    apply(readPreference())
+    if (document.readyState === 'loading') {
+      document.addEventListener(
+        'DOMContentLoaded',
+        () => {
+          apply(readPreference())
+          const observer = new MutationObserver(() => syncControls(readPreference()))
+          observer.observe(document.body, { childList: true, subtree: true })
+        },
+        { once: true },
+      )
+    }
+  })()
+</script>

@@ -1,0 +1,96 @@
+---
+import { ThemeToggle } from '@/components/theme-toggle'
+import MainLayout from '@/layouts/main.astro'
+---
+
+<MainLayout
+  description="Self-host Nore OG with Docker and Cloudflare Workers."
+  title="Self-host · Nore OG">
+  <header class="border-b">
+    <nav
+      aria-label="Main navigation"
+      class="mx-auto flex h-14 w-full max-w-4xl items-center justify-between px-4">
+      <a class="flex items-center gap-2.5" href="/">
+        <img
+          alt="Nore OG"
+          class="size-7 rounded-md"
+          height="28"
+          src="/logo/logo.svg"
+          width="28"
+        />
+        <span class="hidden text-sm font-medium sm:inline">Nore OG</span>
+      </a>
+      <div class="flex items-center gap-1 text-xs">
+        <a
+          class="rounded-md px-2.5 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          href="/">
+          Home
+        </a>
+        <a
+          class="rounded-md px-2.5 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          href="/how">
+          How to use
+        </a>
+        <a
+          aria-current="page"
+          class="rounded-md px-2.5 py-1.5 font-medium"
+          href="/self-host">
+          Self-host
+        </a>
+        <a
+          class="rounded-md px-2.5 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          href="/zh/self-host">
+          中文
+        </a>
+        <ThemeToggle locale="en-US" />
+      </div>
+    </nav>
+  </header>
+
+  <main class="mx-auto w-full max-w-4xl px-4 py-16 sm:py-24">
+    <div class="max-w-2xl">
+      <p class="font-mono text-xs text-muted-foreground">SELF-HOST</p>
+      <h1 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+        Run Nore OG on your own infrastructure
+      </h1>
+      <p class="mt-5 text-sm leading-6 text-muted-foreground">
+        Nore OG consists of a standalone Node.js rendering API and an Astro frontend.
+        Run the API with Docker and deploy the frontend to Cloudflare Workers by
+        default.
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-10">
+      <section>
+        <h2 class="text-sm font-medium">1. Deploy the rendering API</h2>
+        <p class="mt-2 text-sm leading-6 text-muted-foreground">
+          Build and run the Docker image from the repository root:
+        </p>
+        <pre
+          class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker build -t nore-og-api .
+docker run --rm -p 3003:3003 nore-og-api</code></pre>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-medium">2. Configure the web frontend</h2>
+        <p class="mt-2 text-sm leading-6 text-muted-foreground">
+          Set the public API address in the web package build environment. Do not add
+          a trailing slash:
+        </p>
+        <pre
+          class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>PUBLIC_API_BASE_URL=https://og-api.example.com</code></pre>
+      </section>
+
+      <section>
+        <h2 class="text-sm font-medium">3. Deploy the Astro frontend</h2>
+        <p class="mt-2 text-sm leading-6 text-muted-foreground">
+          Install dependencies, then run the existing deployment script from the
+          repository root:
+        </p>
+        <pre
+          class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>pnpm install
+pnpm deploy</code></pre>
+      </section>
+    </div>
+  </main>
+</MainLayout>
