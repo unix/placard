@@ -1,0 +1,8 @@
+.git
+.idea
+**/.astro
+**/dist
+**/node_modules
+**/.env*
+!**/.env.example
+packages/web
