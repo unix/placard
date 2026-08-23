@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+.astro/
+.wrangler/
+.vite/
+
+# environment variables
+.env
+.env.*
+!.env.example
+.dev.vars*
+
+# logs and editors
+*.log
+.DS_Store
+.idea/
