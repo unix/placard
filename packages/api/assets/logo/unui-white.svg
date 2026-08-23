@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">unui logo with rounded white background</title>
+  <desc id="desc">unui 图形标识，圆角白色背景，黑色灯点。</desc>
+  <rect width="64" height="64" rx="16" fill="#ffffff" />
+  <g fill="#111111" transform="translate(13.35 11.62) scale(1.65)">
+    <rect x="0" y="0" width="5.8" height="5.8" rx="1.6" />
+    <rect x="10.13" y="0" width="5.8" height="5.8" rx="1.6" />
+    <rect x="16.8" y="0" width="5.8" height="5.8" rx="1.6" />
+    <rect x="0" y="6.67" width="5.8" height="5.8" rx="1.6" />
+    <rect x="16.8" y="6.67" width="5.8" height="5.8" rx="1.6" />
+    <rect x="0" y="13.33" width="5.8" height="5.8" rx="1.6" />
+    <rect x="16.8" y="13.33" width="5.8" height="5.8" rx="1.6" />
+    <rect x="4.77" y="18.9" width="5.8" height="5.8" rx="1.6" />
+    <rect x="11.43" y="18.9" width="5.8" height="5.8" rx="1.6" />
+  </g>
+</svg>
