@@ -40,8 +40,9 @@ export interface TemplateMeta {
   readonly name: string
   readonly description: string
   readonly fields: readonly Exclude<keyof RenderInput, 'template'>[]
-  readonly previewSvg?: string
 }
+
+export type TemplateSummary = Omit<TemplateMeta, 'fields'>
 
 export interface LogoMeta {
   readonly id: string
@@ -75,10 +76,25 @@ export interface TemplateCatalog {
 }
 
 export const apiBaseUrl = (
-  import.meta.env.PUBLIC_API_BASE_URL ?? 'http://localhost:3003'
+  import.meta.env.PUBLIC_API_BASE_URL ??
+  (import.meta.env.DEV ? 'http://localhost:3003' : '')
 ).replace(/\/$/, '')
 
-export const templateCatalogUrl = `${apiBaseUrl}/api/templates?preview=1`
+export const apiUrl = (path: string) => `${apiBaseUrl}${path}`
+
+export const absoluteApiUrl = (path: string) =>
+  new URL(apiUrl(path), window.location.origin)
+
+export const resolvedApiBaseUrl = () => apiBaseUrl || window.location.origin
+
+export const templateCatalogUrl = apiUrl('/api/templates')
+
+const staticTemplatesBaseUrl = '/generated/templates'
+
+export const staticTemplatesUrl = `${staticTemplatesBaseUrl}/templates.json`
+
+export const staticTemplatePreviewUrl = (templateId: string) =>
+  `${staticTemplatesBaseUrl}/thumbnails/${encodeURIComponent(templateId)}.svg`
 
 const messageFromPayload = (payload: unknown) => {
   if (!payload || typeof payload !== 'object' || !('message' in payload)) return null
@@ -105,7 +121,7 @@ export const renderOpenGraph = async (
   format: RenderFormat,
   signal?: AbortSignal,
 ) => {
-  const response = await fetch(`${apiBaseUrl}/api/render`, {
+  const response = await fetch(apiUrl('/api/render'), {
     body: JSON.stringify({ ...input, ...behavior, format }),
     headers: {
       Accept: format === 'svg' ? 'image/svg+xml' : 'image/png',

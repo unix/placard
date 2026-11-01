@@ -50,20 +50,21 @@ export const NoreSpotlight = (input: RenderInput): ReactElement => {
           }}
         />
       ) : null}
-      <TextBlock
-        color="#292927"
-        fontSize={titleSize(title, { large: 70, medium: 58, small: 48 })}
-        fontWeight={600}
-        letterSpacing={-1.2}
-        lineHeight={titleLineHeight(title, 0.98)}
-        style={{
-          width: px(1000),
-          justifyContent: 'center',
-          textAlign: 'center',
-          textWrap: 'balance',
-        }}>
-        {title}
-      </TextBlock>
+      <div style={{ display: 'flex', width: px(880), justifyContent: 'center' }}>
+        <TextBlock
+          color="#292927"
+          fontSize={titleSize(title, { large: 70, medium: 58, small: 48 })}
+          fontWeight={600}
+          letterSpacing={-1.2}
+          lineHeight={titleLineHeight(title, 0.98)}
+          style={{
+            maxWidth: px(880),
+            textAlign: 'center',
+            textWrap: 'wrap',
+          }}>
+          {title}
+        </TextBlock>
+      </div>
     </div>
   )
 }

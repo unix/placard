@@ -2,24 +2,33 @@
 import GeistLatin from '@/components/astro/effects/geist-latin.astro'
 import GoogleAnalytics from '@/components/astro/effects/google-analytics.astro'
 import ThemeInit from '@/components/astro/effects/theme-init.astro'
-import '../styles/global.css'
+import '../global.css'
 
 interface Props {
+  readonly alternateOpenGraphLocale: string
   readonly criticalFontDisabled?: boolean
-  readonly description?: string
+  readonly description: string
   readonly googleAnalyticsMeasurementId?: string
-  readonly lang?: string
-  readonly title?: string
+  readonly imageAlt: string
+  readonly lang: string
+  readonly openGraphLocale: string
+  readonly title: string
 }
 
 const {
+  alternateOpenGraphLocale,
   criticalFontDisabled = false,
-  description = 'Preview and render self-hosted Open Graph images with Nore OG.',
+  description,
   googleAnalyticsMeasurementId = import.meta.env
     .PUBLIC_GOOGLE_ANALYTICS_MEASUREMENT_ID,
-  lang = 'en-US',
-  title = 'Nore OG',
+  imageAlt,
+  lang,
+  openGraphLocale,
+  title,
 } = Astro.props
+
+const canonicalUrl = new URL(Astro.url.pathname, 'https://og.nore.sh')
+const openGraphImageUrl = 'https://og.nore.sh/logo/og.png'
 ---
 
 <!doctype html>
@@ -28,8 +37,27 @@ const {
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
+    <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href="/logo/logo.svg" />
     <meta name="theme-color" content="#ffffff" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Nore OG" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content={openGraphLocale} />
+    <meta property="og:locale:alternate" content={alternateOpenGraphLocale} />
+    <meta property="og:image" content={openGraphImageUrl} />
+    <meta property="og:image:secure_url" content={openGraphImageUrl} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="675" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={openGraphImageUrl} />
+    <meta name="twitter:image:alt" content={imageAlt} />
     <ThemeInit />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>

@@ -1,30 +1,14 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 
 import { imageHeight, imageWidth } from '../constants.js'
-import type { RenderInput } from '../og/input.js'
 import type { RenderContext } from '../og/render-context.js'
 import {
-  cardStyle,
-  descriptionText,
-  Header,
-  px,
-  sansFontFamily,
-  TextBlock,
-  titleLineHeight,
-  titleSize,
-  titleText,
-} from './shared.js'
-import type { OgTemplate, OgTemplateMeta } from './types.js'
-
-const gridTemplateFields = [
-  'brandName',
-  'logoId',
-  'logoUrl',
-  'title',
-  'description',
-  'author',
-  'date',
-] as const satisfies OgTemplateMeta['fields']
+  fieldsForKnownTemplateStyle,
+  renderKnownTemplateStyle,
+  type KnownTemplateStyle,
+} from './known-template-styles.js'
+import { cardStyle, sansFontFamily } from './shared.js'
+import type { OgTemplate } from './types.js'
 
 type GridPatternKind = 'dot' | 'hexagon' | 'pattern'
 type GridCoordinate = readonly [column: number, row: number]
@@ -33,8 +17,6 @@ interface GridPreset {
   readonly accentColor: string
   readonly backgroundColor: string
   readonly backdrop: string
-  readonly label: string
-  readonly lineColor: string
   readonly mutedTextColor: string
   readonly patternColor: string
   readonly patternKind: GridPatternKind
@@ -46,6 +28,7 @@ interface GridTemplateDefinition {
   readonly id: string
   readonly name: string
   readonly preset: GridPreset
+  readonly style: KnownTemplateStyle
 }
 
 const svgDataUrl = (svg: string) =>
@@ -171,7 +154,8 @@ const hexagonPatternSvg = (preset: GridPreset, random: () => number) => {
     ${hexagons
       .map(([column, row]) => {
         const cx = column * columnStep + columnStep / 2
-        const cy = row * rowStep + rowStep / 2 + (column % 2 === 0 ? 0 : rowStep / 2)
+        const cy =
+          column % 2 === 0 ? row * rowStep + rowStep / 2 : row * rowStep + rowStep
 
         return `<polygon points="${hexagonPoints(cx, cy, radius - 2)}" fill="${preset.accentColor}" fill-opacity=".13" stroke="${preset.accentColor}" stroke-opacity=".4" stroke-width="1"/>`
       })
@@ -186,162 +170,79 @@ const patternImage = (preset: GridPreset, random: () => number) => {
   return squarePatternSvg(preset, random)
 }
 
-const GridDescription = ({
-  input,
+const GridFrame = ({
+  children,
   preset,
+  random,
 }: {
-  readonly input: RenderInput
+  readonly children: ReactNode
   readonly preset: GridPreset
-}) => {
-  const description = descriptionText(input)
-  if (!description) return null
-
-  return (
-    <TextBlock
-      color={preset.mutedTextColor}
-      fontSize={px(24)}
-      fontWeight={480}
-      lineHeight={1.4}
-      style={{ lineClamp: 3, marginTop: px(26), width: px(680) }}>
-      {description}
-    </TextBlock>
-  )
-}
-
-const GridCard = (
-  input: RenderInput,
-  context: RenderContext,
-  preset: GridPreset,
-): ReactElement => {
-  const title = titleText(input)
-  const pattern = patternImage(preset, context.random)
-
-  return (
+  readonly random: RenderContext['random']
+}): ReactElement => (
+  <div
+    style={{
+      ...cardStyle,
+      backgroundColor: preset.backgroundColor,
+      color: preset.textColor,
+      fontFamily: sansFontFamily,
+    }}>
+    <img
+      alt=""
+      height={imageHeight}
+      src={patternImage(preset, random)}
+      width={imageWidth}
+      style={{
+        display: 'flex',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: imageWidth,
+        height: imageHeight,
+        objectFit: 'cover',
+      }}
+    />
     <div
       style={{
-        ...cardStyle,
-        backgroundColor: preset.backgroundColor,
-        color: preset.textColor,
-        fontFamily: sansFontFamily,
+        display: 'flex',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundImage: preset.backdrop,
+      }}
+    />
+    <div
+      style={{
+        display: 'flex',
+        position: 'relative',
+        width: '100%',
+        height: '100%',
       }}>
-      <img
-        alt=""
-        src={pattern}
-        width={imageWidth}
-        height={imageHeight}
-        style={{
-          display: 'flex',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: imageWidth,
-          height: imageHeight,
-          objectFit: 'cover',
-        }}
-      />
-      <div
-        style={{
-          display: 'flex',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundImage: preset.backdrop,
-        }}
-      />
-      <div
-        style={{
-          display: 'flex',
-          position: 'relative',
-          width: '100%',
-          height: '100%',
-          flexDirection: 'column',
-          padding: px(64),
-        }}>
-        <Header
-          brandColor={preset.textColor}
-          input={input}
-          metaColor={preset.mutedTextColor}
-          separatorColor={preset.lineColor}
-        />
-        <div
-          style={{
-            display: 'flex',
-            flex: 1,
-            flexDirection: 'column',
-            justifyContent: 'center',
-          }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div
-              style={{
-                display: 'flex',
-                width: px(10),
-                height: px(10),
-                backgroundColor: preset.accentColor,
-                marginRight: px(12),
-              }}
-            />
-            <TextBlock
-              color={preset.mutedTextColor}
-              fontSize={px(16)}
-              fontWeight={650}
-              letterSpacing={1.6}
-              lineHeight={1}>
-              GRID / {preset.label}
-            </TextBlock>
-          </div>
-          <div style={{ display: 'flex', marginTop: px(24) }}>
-            <TextBlock
-              color={preset.textColor}
-              fontSize={titleSize(title, { large: 76, medium: 62, small: 49 })}
-              fontWeight={700}
-              letterSpacing={-1.5}
-              lineHeight={titleLineHeight(title, 1.02)}
-              style={{ textWrap: 'balance', width: px(800) }}>
-              {title}
-            </TextBlock>
-          </div>
-          <GridDescription input={input} preset={preset} />
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}>
-          <div
-            style={{
-              display: 'flex',
-              width: px(84),
-              height: px(2),
-              backgroundColor: preset.accentColor,
-            }}
-          />
-          <TextBlock
-            color={preset.mutedTextColor}
-            fontSize={px(14)}
-            fontWeight={560}
-            letterSpacing={1.2}>
-            1200 × 675
-          </TextBlock>
-        </div>
-      </div>
+      {children}
     </div>
-  )
-}
+  </div>
+)
 
 const defineGridTemplate = ({
   description,
   id,
   name,
   preset,
+  style,
 }: GridTemplateDefinition): OgTemplate => ({
   description,
-  fields: gridTemplateFields,
+  fields: fieldsForKnownTemplateStyle(style),
   id,
   name,
-  render: (input, context) => GridCard(input, context, preset),
+  render: (input, context) => (
+    <GridFrame preset={preset} random={context.random}>
+      {renderKnownTemplateStyle(style, input, {
+        foreground: preset.textColor,
+        secondary: preset.mutedTextColor,
+      })}
+    </GridFrame>
+  ),
 })
 
 export const gridTemplates = [
@@ -349,14 +250,13 @@ export const gridTemplates = [
     id: 'grid-pattern',
     name: 'Grid Pattern',
     description:
-      'Editorial light card with a seeded square grid and highlighted cells.',
+      'A light seeded square grid with a simple framed title composition.',
+    style: 'around',
     preset: {
       accentColor: '#2563eb',
       backgroundColor: '#f8fafc',
       backdrop:
         'linear-gradient(90deg, rgba(248, 250, 252, 0.98) 0%, rgba(248, 250, 252, 0.91) 58%, rgba(248, 250, 252, 0.2) 100%)',
-      label: 'PATTERN',
-      lineColor: '#cbd5e1',
       mutedTextColor: '#475569',
       patternColor: '#64748b',
       patternKind: 'pattern',
@@ -364,17 +264,32 @@ export const gridTemplates = [
     },
   }),
   defineGridTemplate({
+    id: 'grid-dark',
+    name: 'Grid Dark',
+    description:
+      'A graphite square grid with a logo-led title and summary composition.',
+    style: 'float-summary',
+    preset: {
+      accentColor: '#a1a1aa',
+      backgroundColor: '#202124',
+      backdrop:
+        'linear-gradient(90deg, rgba(32, 33, 36, 0.99) 0%, rgba(32, 33, 36, 0.91) 62%, rgba(32, 33, 36, 0.26) 100%)',
+      mutedTextColor: '#a1a1aa',
+      patternColor: '#f8fafc',
+      patternKind: 'pattern',
+      textColor: '#fafafa',
+    },
+  }),
+  defineGridTemplate({
     id: 'grid-dot',
     name: 'Grid Dot',
-    description:
-      'Deep navy card with a precise dot matrix and softly glowing points.',
+    description: 'A deep dot matrix with a logo-led title and summary composition.',
+    style: 'float-summary',
     preset: {
       accentColor: '#38bdf8',
       backgroundColor: '#070a12',
       backdrop:
         'linear-gradient(90deg, rgba(7, 10, 18, 0.99) 0%, rgba(7, 10, 18, 0.91) 58%, rgba(7, 10, 18, 0.18) 100%)',
-      label: 'DOT',
-      lineColor: '#334155',
       mutedTextColor: '#94a3b8',
       patternColor: '#64748b',
       patternKind: 'dot',
@@ -385,14 +300,13 @@ export const gridTemplates = [
     id: 'grid-hexagon',
     name: 'Grid Hexagon',
     description:
-      'Dark emerald card with a honeycomb grid and highlighted hexagonal cells.',
+      'A dark honeycomb field with a logo-led title and summary composition.',
+    style: 'float-summary',
     preset: {
       accentColor: '#34d399',
       backgroundColor: '#06140f',
       backdrop:
         'linear-gradient(90deg, rgba(6, 20, 15, 0.99) 0%, rgba(6, 20, 15, 0.91) 58%, rgba(6, 20, 15, 0.16) 100%)',
-      label: 'HEXAGON',
-      lineColor: '#14532d',
       mutedTextColor: '#86efac',
       patternColor: '#34d399',
       patternKind: 'hexagon',

@@ -1,0 +1,262 @@
+[
+  {
+    "description": "Neutral single-panel OG card with optional metadata.",
+    "id": "nore-minimal",
+    "name": "Nore Minimal"
+  },
+  {
+    "description": "Minimal logo-focused OG card with a bottom title badge.",
+    "id": "nore-logo-only",
+    "name": "Nore Logo Only"
+  },
+  {
+    "description": "Dark logo-focused OG card with a centered bottom title badge.",
+    "id": "nore-logo-only-dark",
+    "name": "Nore Logo Only Dark"
+  },
+  {
+    "description": "Minimal black gradient OG card with a bold centered blog name.",
+    "id": "nore-report",
+    "name": "Nore Report"
+  },
+  {
+    "description": "Dark single-panel OG card with a bold title and slash-separated metadata.",
+    "id": "nore-night",
+    "name": "Nore Night"
+  },
+  {
+    "description": "Warm editorial OG card with a centered logo and title.",
+    "id": "nore-spotlight",
+    "name": "Nore Spotlight"
+  },
+  {
+    "description": "Layered neutral OG card with centered title and metadata.",
+    "id": "nore-stack",
+    "name": "Nore Stack"
+  },
+  {
+    "description": "Black OG card with a large centered logo and site name.",
+    "id": "nore-signal",
+    "name": "Nore Signal"
+  },
+  {
+    "description": "Light blueprint OG card with grid background and centered hierarchy.",
+    "id": "nore-blueprint",
+    "name": "Nore Blueprint"
+  },
+  {
+    "description": "High-contrast white card with stacked black title and author blocks.",
+    "id": "nore-central",
+    "name": "Nore Central"
+  },
+  {
+    "description": "Deep navy and violet gradient card with a centered title composition.",
+    "id": "gradient-midnight",
+    "name": "Gradient Midnight"
+  },
+  {
+    "description": "Layered teal, cyan, and violet card with a logo-led title and summary.",
+    "id": "gradient-aurora",
+    "name": "Gradient Aurora"
+  },
+  {
+    "description": "Vivid cyan, magenta, and gold card with a centered title composition.",
+    "id": "gradient-prism",
+    "name": "Gradient Prism"
+  },
+  {
+    "description": "Warm plum, coral, and apricot story card with bottom-anchored content.",
+    "id": "gradient-sunset",
+    "name": "Gradient Sunset"
+  },
+  {
+    "description": "Airy pearl, lavender, and sky card with a centered title composition.",
+    "id": "gradient-mist",
+    "name": "Gradient Mist"
+  },
+  {
+    "description": "Layered ocean and indigo story card with bottom-anchored content.",
+    "id": "gradient-horizon",
+    "name": "Gradient Horizon"
+  },
+  {
+    "description": "Layered graphite and silver card with a title-first reverse composition.",
+    "id": "gradient-mono",
+    "name": "Gradient Mono"
+  },
+  {
+    "description": "A light seeded square grid with a simple framed title composition.",
+    "id": "grid-pattern",
+    "name": "Grid Pattern"
+  },
+  {
+    "description": "A graphite square grid with a logo-led title and summary composition.",
+    "id": "grid-dark",
+    "name": "Grid Dark"
+  },
+  {
+    "description": "A deep dot matrix with a logo-led title and summary composition.",
+    "id": "grid-dot",
+    "name": "Grid Dot"
+  },
+  {
+    "description": "A dark honeycomb field with a logo-led title and summary composition.",
+    "id": "grid-hexagon",
+    "name": "Grid Hexagon"
+  },
+  {
+    "description": "A quiet paper card with the headline first and identity below.",
+    "id": "paper-ledger",
+    "name": "Paper Ledger"
+  },
+  {
+    "description": "A restrained paper brief with a broad title and summary.",
+    "id": "paper-brief",
+    "name": "Paper Brief"
+  },
+  {
+    "description": "A clean horizontal identity lockup on a warm paper surface.",
+    "id": "paper-masthead",
+    "name": "Paper Masthead"
+  },
+  {
+    "description": "A near-black framed title composition with restrained contrast.",
+    "id": "ink-column",
+    "name": "Ink Column"
+  },
+  {
+    "description": "A centered dark statement with a compact identity marker.",
+    "id": "ink-focus",
+    "name": "Ink Focus"
+  },
+  {
+    "description": "A centered headline on a softly glowing ink field.",
+    "id": "ink-statement",
+    "name": "Ink Statement"
+  },
+  {
+    "description": "A bottom-anchored story over a deep navy and violet atmosphere.",
+    "id": "midnight-story",
+    "name": "Midnight Story"
+  },
+  {
+    "description": "A spacious midnight brief with an expansive title and summary.",
+    "id": "midnight-brief",
+    "name": "Midnight Brief"
+  },
+  {
+    "description": "A strong title block with the site name on a midnight gradient.",
+    "id": "midnight-block",
+    "name": "Midnight Block"
+  },
+  {
+    "description": "A framed title composition over a teal and violet atmosphere.",
+    "id": "aurora-column",
+    "name": "Aurora Column"
+  },
+  {
+    "description": "A centered headline held inside a softly drifting aurora.",
+    "id": "aurora-focus",
+    "name": "Aurora Focus"
+  },
+  {
+    "description": "A large identity presentation over a luminous teal atmosphere.",
+    "id": "aurora-mark",
+    "name": "Aurora Mark"
+  },
+  {
+    "description": "A centered dark headline on a cyan, magenta, and gold field.",
+    "id": "prism-focus",
+    "name": "Prism Focus"
+  },
+  {
+    "description": "A bold prismatic brief with a wide headline and supporting copy.",
+    "id": "prism-brief",
+    "name": "Prism Brief"
+  },
+  {
+    "description": "A vivid identity lockup for compact brand announcements.",
+    "id": "prism-masthead",
+    "name": "Prism Masthead"
+  },
+  {
+    "description": "A framed title composition over plum, coral, and apricot color.",
+    "id": "sunset-column",
+    "name": "Sunset Column"
+  },
+  {
+    "description": "A centered story title surrounded by a warm sunset glow.",
+    "id": "sunset-focus",
+    "name": "Sunset Focus"
+  },
+  {
+    "description": "A clear centered statement over a high-energy warm gradient.",
+    "id": "sunset-statement",
+    "name": "Sunset Statement"
+  },
+  {
+    "description": "A bottom-anchored story on an airy pearl and lavender field.",
+    "id": "mist-story",
+    "name": "Mist Story"
+  },
+  {
+    "description": "A light editorial brief with a generous title and summary.",
+    "id": "mist-brief",
+    "name": "Mist Brief"
+  },
+  {
+    "description": "A calm identity presentation on a pearl and sky gradient.",
+    "id": "mist-mark",
+    "name": "Mist Mark"
+  },
+  {
+    "description": "A centered headline on a layered graphite monochrome surface.",
+    "id": "mono-focus",
+    "name": "Mono Focus"
+  },
+  {
+    "description": "A monochrome folio with the title above and identity below.",
+    "id": "mono-folio",
+    "name": "Mono Folio"
+  },
+  {
+    "description": "A horizontal identity lockup on graphite and silver.",
+    "id": "mono-masthead",
+    "name": "Mono Masthead"
+  },
+  {
+    "description": "A simple framed title composition over a quiet technical grid.",
+    "id": "grid-light-column",
+    "name": "Grid Light Column"
+  },
+  {
+    "description": "A centered technical statement on a clean light grid.",
+    "id": "grid-light-focus",
+    "name": "Grid Light Focus"
+  },
+  {
+    "description": "A simple framed title composition on a graphite grid.",
+    "id": "grid-dark-column",
+    "name": "Grid Dark Column"
+  },
+  {
+    "description": "Shell output interface with the article title as stdout.",
+    "id": "system-shell",
+    "name": "System Shell"
+  },
+  {
+    "description": "Kernel panic output with the article title as the fatal message.",
+    "id": "system-kernel-panic",
+    "name": "System Kernel Panic"
+  },
+  {
+    "description": "BIOS POST interface that boots directly into the article title.",
+    "id": "system-bios",
+    "name": "System BIOS"
+  },
+  {
+    "description": "Minimal black financial event card inspired by community cards.",
+    "id": "community-apple-financial",
+    "name": "Apple Financial"
+  }
+]

@@ -10,8 +10,14 @@ import {
 
 import { DynamicHeight } from '@/components/dynamic-height'
 import { GetApisDialog } from '@/components/get-apis-dialog'
+import { GitHubLink } from '@/components/github-link'
+import { PreviewCardSkeleton } from '@/components/preview-card-skeleton'
 import { RenderBehaviorControls } from '@/components/render-behavior-controls'
 import { RenderButton } from '@/components/render-button'
+import {
+  TemplateListSkeleton,
+  TemplateThumbnail,
+} from '@/components/template-list-skeleton'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -34,6 +40,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import {
   renderOpenGraph,
+  staticTemplatePreviewUrl,
+  staticTemplatesUrl,
   templateCatalogUrl,
   type GlobalRenderBehavior,
   type RenderBehaviorCatalog,
@@ -41,17 +49,18 @@ import {
   type RenderInput,
   type TemplateCatalog,
   type TemplateMeta,
+  type TemplateSummary,
 } from '@/lib/api'
 import { defaultLocale, LocalePath, type Locale } from '@/i18n/locales'
 import {
   readFavoriteTemplateIds,
   writeFavoriteTemplateIds,
-} from '@/services/client/template-favorites'
+} from '@/lib/client/template-favorites'
 import {
   normalizedGlobalRenderBehavior,
   readGlobalRenderBehavior,
   writeGlobalRenderBehavior,
-} from '@/services/client/render-behavior'
+} from '@/lib/client/render-behavior'
 
 const imageWidth = 1200
 const imageHeight = 675
@@ -82,8 +91,8 @@ const templateGalleryLocales = {
     exporting: 'Exporting',
     favoriteSaveFailed: 'Could not save favorites. Please try again.',
     favorited: 'Favorited',
-    home: 'Home',
-    how: 'How to use',
+    home: 'App',
+    intro: 'Introduction',
     language: '中文',
     loading: 'Loading',
     loadingPreview: 'Loading templates…',
@@ -92,18 +101,13 @@ const templateGalleryLocales = {
     noLogo: 'No logo',
     noPreview: 'No preview',
     operationArea: 'Controls',
-    pendingUpdate: 'Update pending',
     preview: 'Preview',
     previewAlt: 'Open Graph image preview',
     previewStale: ' · Content changed; update the preview',
-    ready: 'Ready',
     renderAgain: 'Render again',
     rendering: 'Rendering',
     removeFavorite: 'Remove from favorites',
     requestFailed: 'Request failed. Please try again.',
-    requiresAttention: 'Needs attention',
-    selfHost: 'Self-host',
-    statusExporting: 'Exporting',
     templateListLabel: 'Template list',
     templatePreviewSuffix: 'template preview',
     templateSectionLabel: 'Template selection',
@@ -138,8 +142,8 @@ const templateGalleryLocales = {
     exporting: '导出中',
     favoriteSaveFailed: '收藏保存失败，请重试。',
     favorited: '已收藏',
-    home: '首页',
-    how: '如何使用',
+    home: '应用',
+    intro: '介绍',
     language: 'EN',
     loading: '载入中',
     loadingPreview: '正在载入模板…',
@@ -148,18 +152,13 @@ const templateGalleryLocales = {
     noLogo: '不显示 Logo',
     noPreview: '暂无预览',
     operationArea: '操作区',
-    pendingUpdate: '待更新',
     preview: '预览',
     previewAlt: 'Open Graph 图片预览',
     previewStale: ' · 内容已修改，请更新预览',
-    ready: '已就绪',
     renderAgain: '重新渲染',
     rendering: '渲染中',
     removeFavorite: '取消收藏',
     requestFailed: '请求失败，请稍后重试。',
-    requiresAttention: '需要处理',
-    selfHost: '自部署',
-    statusExporting: '导出中',
     templateListLabel: '模板列表',
     templatePreviewSuffix: '模板预览',
     templateSectionLabel: '模板选择',
@@ -391,7 +390,18 @@ const firstInputPreset = inputPresets[0]
 
 const initialInput: RenderInput = {
   ...firstInputPreset.input,
-  template: 'nore-minimal',
+  template: 'gradient-sunset',
+}
+
+const initialInputDefaults: RenderInput = {
+  author: '',
+  brandName: '',
+  date: '',
+  description: '',
+  logoId: 'none',
+  logoUrl: '',
+  template: 'gradient-sunset',
+  title: 'Untitled page',
 }
 
 const initialLimits: TemplateCatalog['limits'] = {
@@ -571,10 +581,8 @@ const downloadBlob = (blob: Blob, fileName: string) => {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
-const templatePreviewUrl = (template: TemplateMeta) => {
-  if (!template.previewSvg) return null
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(template.previewSvg)}`
-}
+const templatePreviewUrl = (template: TemplateSummary) =>
+  staticTemplatePreviewUrl(template.id)
 
 const inputSignature = (input: RenderInput, behavior: GlobalRenderBehavior) =>
   JSON.stringify({ behavior, input })
@@ -582,7 +590,9 @@ const inputSignature = (input: RenderInput, behavior: GlobalRenderBehavior) =>
 export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale }) => {
   const copy = templateGalleryLocales[locale]
   const [input, setInput] = useState<RenderInput>(initialInput)
-  const [templates, setTemplates] = useState<readonly TemplateMeta[]>([])
+  const [inputDefaults, setInputDefaults] =
+    useState<RenderInput>(initialInputDefaults)
+  const [templates, setTemplates] = useState<readonly TemplateSummary[]>([])
   const [favoriteTemplateIds, setFavoriteTemplateIds] = useState<readonly string[]>(
     [],
   )
@@ -599,9 +609,10 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
     useState<GlobalRenderBehavior>(initialRenderBehaviorCatalog.defaults)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [selectedPresetId, setSelectedPresetId] = useState(firstInputPreset.id)
-  const [isCustomInputOpen, setIsCustomInputOpen] = useState(false)
+  const [isCustomInputOpen, setIsCustomInputOpen] = useState(true)
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false)
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true)
+  const [isLoadingCatalog, setIsLoadingCatalog] = useState(true)
   const [isSavingFavorite, setIsSavingFavorite] = useState(false)
   const [isApplyingRenderBehavior, setIsApplyingRenderBehavior] = useState(false)
   const [isRendering, setIsRendering] = useState(false)
@@ -609,11 +620,14 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
   const [renderedInputSignature, setRenderedInputSignature] = useState<
     string | null
   >(null)
+  const [previewError, setPreviewError] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const templateListRef = useRef<HTMLDivElement>(null)
   const templateButtonRefs = useRef(new Map<string, HTMLButtonElement>())
   const templatePositionsRef = useRef(new Map<string, DOMRect>())
   const animatedTemplateIdRef = useRef<string | null>(null)
+  const previewRequestControllerRef = useRef<AbortController | null>(null)
+  const previewRequestIdRef = useRef(0)
 
   const selectedTemplate = useMemo(
     () => templates.find(template => template.id === input.template) ?? null,
@@ -641,32 +655,13 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
   )
   const isCustomLogo = input.logoId === logos.customId
   const customLogoUrlMissing = isCustomLogo && !input.logoUrl.trim()
-  const canRender = templates.length > 0 && !isLoadingTemplates
+  const templatesReady = templates.length > 0 && !isLoadingTemplates
+  const canRender = !isLoadingCatalog
   const isBusy = isRendering || exportingFormat !== null || isApplyingRenderBehavior
+  const isPreviewLoading = isLoadingCatalog || isRendering
   const isPreviewStale =
     previewUrl !== null &&
     renderedInputSignature !== inputSignature(input, renderBehavior)
-  const statusLabel = error
-    ? copy.requiresAttention
-    : isLoadingTemplates
-      ? copy.loading
-      : isRendering
-        ? copy.rendering
-        : exportingFormat
-          ? copy.statusExporting
-          : isPreviewStale
-            ? copy.pendingUpdate
-            : copy.ready
-  const statusDotClassName = error
-    ? 'bg-red-500'
-    : isLoadingTemplates || isBusy || isPreviewStale
-      ? 'bg-amber-500'
-      : 'bg-emerald-500'
-  const statusTextClassName = error
-    ? 'text-red-700 dark:text-red-400'
-    : isLoadingTemplates || isBusy || isPreviewStale
-      ? 'text-amber-700 dark:text-amber-400'
-      : 'text-emerald-700 dark:text-emerald-400'
   const isSelectedTemplateFavorite = favoriteTemplateIds.includes(input.template)
 
   const captureTemplatePositions = useCallback((templateId: string) => {
@@ -731,15 +726,46 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
       nextBehavior: GlobalRenderBehavior,
       signal?: AbortSignal,
     ) => {
+      if (signal?.aborted) return
+      previewRequestControllerRef.current?.abort()
+      const controller = new AbortController()
+      const requestId = previewRequestIdRef.current + 1
+      const abortFromSignal = () => controller.abort(signal?.reason)
+      previewRequestControllerRef.current = controller
+      previewRequestIdRef.current = requestId
+      signal?.addEventListener('abort', abortFromSignal, { once: true })
       setIsRendering(true)
+      setPreviewError(null)
       setError(null)
       try {
-        const blob = await renderOpenGraph(nextInput, nextBehavior, 'svg', signal)
+        const blob = await renderOpenGraph(
+          nextInput,
+          nextBehavior,
+          'svg',
+          controller.signal,
+        )
+        if (requestId !== previewRequestIdRef.current) return
         setPreviewUrl(URL.createObjectURL(blob))
         setRenderedInputSignature(inputSignature(nextInput, nextBehavior))
+      } catch (error) {
+        if (controller.signal.aborted) return
+        if (requestId !== previewRequestIdRef.current) return
+        setPreviewError(errorMessage(error, locale))
       } finally {
-        setIsRendering(false)
+        signal?.removeEventListener('abort', abortFromSignal)
+        if (requestId === previewRequestIdRef.current) {
+          previewRequestControllerRef.current = null
+          setIsRendering(false)
+        }
       }
+    },
+    [locale],
+  )
+
+  useEffect(
+    () => () => {
+      previewRequestIdRef.current += 1
+      previewRequestControllerRef.current?.abort()
     },
     [],
   )
@@ -751,9 +777,41 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
       setIsLoadingTemplates(true)
       try {
         const [response, storedFavoriteTemplateIds] = await Promise.all([
-          fetch(templateCatalogUrl, { signal: controller.signal }),
+          fetch(staticTemplatesUrl, { signal: controller.signal }),
           readFavoriteTemplateIds(),
         ])
+        if (!response.ok) throw new Error(`${copy.apiError} ${response.status}`)
+        const staticTemplates = (await response.json()) as readonly TemplateSummary[]
+        const availableTemplateIds = new Set(
+          staticTemplates.map(template => template.id),
+        )
+        setTemplates(staticTemplates)
+        setFavoriteTemplateIds(
+          storedFavoriteTemplateIds.filter(templateId =>
+            availableTemplateIds.has(templateId),
+          ),
+        )
+      } catch (caught) {
+        if (controller.signal.aborted) return
+        setError(errorMessage(caught, locale))
+      } finally {
+        if (!controller.signal.aborted) setIsLoadingTemplates(false)
+      }
+    }
+
+    void loadTemplates()
+    return () => controller.abort()
+  }, [copy.apiError, locale])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    const loadCatalog = async () => {
+      setIsLoadingCatalog(true)
+      try {
+        const response = await fetch(templateCatalogUrl, {
+          signal: controller.signal,
+        })
         if (!response.ok) throw new Error(`${copy.apiError} ${response.status}`)
         const catalog = (await response.json()) as TemplateCatalog
         const storedRenderBehavior = await readGlobalRenderBehavior(
@@ -764,33 +822,26 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
           catalog.defaults.template,
         )
         const nextInput = inputFromPreset(firstInputPreset, template)
-        const availableTemplateIds = new Set(
-          catalog.templates.map(catalogTemplate => catalogTemplate.id),
-        )
-        setTemplates(catalog.templates)
-        setFavoriteTemplateIds(
-          storedFavoriteTemplateIds.filter(templateId =>
-            availableTemplateIds.has(templateId),
-          ),
-        )
         setLimits(catalog.limits)
         setLogos(catalog.logos)
         setImage(catalog.image)
+        setInputDefaults(catalog.defaults)
         setRenderBehaviorCatalog(catalog.renderBehavior)
         setRenderBehavior(storedRenderBehavior)
         setDraftRenderBehavior(storedRenderBehavior)
         setInput(nextInput)
         updateTemplateQuery(template)
+        setIsLoadingCatalog(false)
         await renderPreview(nextInput, storedRenderBehavior, controller.signal)
       } catch (caught) {
         if (controller.signal.aborted) return
         setError(errorMessage(caught, locale))
       } finally {
-        if (!controller.signal.aborted) setIsLoadingTemplates(false)
+        if (!controller.signal.aborted) setIsLoadingCatalog(false)
       }
     }
 
-    void loadTemplates()
+    void loadCatalog()
     return () => controller.abort()
   }, [copy.apiError, locale, renderPreview])
 
@@ -809,11 +860,12 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
     }
 
   const updateAuthor = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    const { value } = event.currentTarget
     setSelectedPresetId('')
     setError(null)
     setInput(current => ({
       ...current,
-      author: authorFromEditorValue(event.currentTarget.value),
+      author: authorFromEditorValue(value),
     }))
   }
 
@@ -826,11 +878,9 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
       setInput(nextInput)
       updateTemplateQuery(template)
       if (!canRender) return
-      void renderPreview(nextInput, renderBehavior).catch(caught =>
-        setError(errorMessage(caught, locale)),
-      )
+      void renderPreview(nextInput, renderBehavior)
     },
-    [canRender, input, locale, renderBehavior, renderPreview],
+    [canRender, input, renderBehavior, renderPreview],
   )
 
   const toggleTemplateFavorite = useCallback(async () => {
@@ -875,11 +925,9 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
       setSelectedPresetId(preset.id)
       setInput(nextInput)
       if (!canRender) return
-      void renderPreview(nextInput, renderBehavior).catch(caught =>
-        setError(errorMessage(caught, locale)),
-      )
+      void renderPreview(nextInput, renderBehavior)
     },
-    [canRender, input.template, locale, renderBehavior, renderPreview],
+    [canRender, input.template, renderBehavior, renderPreview],
   )
 
   const applyRenderBehavior = useCallback(
@@ -932,15 +980,12 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
         setError(copy.customLogoRequired)
         return
       }
-      void renderPreview(input, renderBehavior).catch(caught =>
-        setError(errorMessage(caught, locale)),
-      )
+      void renderPreview(input, renderBehavior)
     },
     [
       copy.customLogoRequired,
       customLogoUrlMissing,
       input,
-      locale,
       renderBehavior,
       renderPreview,
     ],
@@ -982,12 +1027,6 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
               width="28"
             />
             <h1 className="hidden text-sm font-medium sm:block">Nore OG</h1>
-            <span
-              aria-live="polite"
-              className={`hidden items-center gap-1.5 text-xs lg:inline-flex ${statusTextClassName}`}>
-              <span className={`size-1.5 rounded-full ${statusDotClassName}`} />
-              {statusLabel}
-            </span>
           </div>
           <nav
             aria-label={copy.navigationLabel}
@@ -1000,14 +1039,10 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
             </a>
             <a
               className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              href={LocalePath(locale, 'how')}>
-              {copy.how}
+              href={LocalePath(locale, 'intro')}>
+              {copy.intro}
             </a>
-            <a
-              className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              href={LocalePath(locale, 'selfHost')}>
-              {copy.selfHost}
-            </a>
+            <GitHubLink locale={locale} />
             <a
               className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               href={LocalePath(locale === 'en-US' ? 'zh-CN' : 'en-US', 'home')}>
@@ -1029,7 +1064,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                 </span>
               </div>
               <Button
-                disabled={!canRender || isBusy}
+                disabled={!templatesReady}
                 onClick={() => setIsTemplateDialogOpen(true)}
                 size="sm"
                 type="button"
@@ -1039,83 +1074,87 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
               </Button>
             </div>
             <div className="px-3 pb-3 lg:hidden">
-              <Button
-                className="h-11 w-full justify-start gap-2 overflow-hidden rounded-md p-1.5 text-left"
-                disabled={!canRender || isBusy}
-                onClick={() => setIsTemplateDialogOpen(true)}
-                type="button"
-                variant="outline">
-                <span className="flex aspect-video h-full shrink-0 items-center justify-center overflow-hidden rounded-sm border bg-muted">
+              {isLoadingTemplates ? (
+                <TemplateListSkeleton compact />
+              ) : (
+                <Button
+                  className="h-11 w-full justify-start gap-2 overflow-hidden rounded-md p-1.5 text-left"
+                  disabled={!templatesReady}
+                  onClick={() => setIsTemplateDialogOpen(true)}
+                  type="button"
+                  variant="outline">
                   {selectedTemplate ? (
-                    <img
+                    <TemplateThumbnail
                       alt=""
-                      className="h-full w-full object-cover"
-                      src={templatePreviewUrl(selectedTemplate) ?? undefined}
+                      className="aspect-video h-full shrink-0 rounded-sm"
+                      fallbackLabel={copy.noPreview}
+                      src={templatePreviewUrl(selectedTemplate)}
                     />
                   ) : null}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate text-xs font-medium">
-                    {selectedTemplate?.name ?? copy.waitingForTemplate}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-xs font-medium">
+                      {selectedTemplate?.name ?? copy.waitingForTemplate}
+                    </span>
+                    <span className="block truncate font-mono text-[0.625rem] font-normal text-muted-foreground">
+                      {selectedTemplate?.id ?? input.template}
+                    </span>
                   </span>
-                  <span className="block truncate font-mono text-[0.625rem] font-normal text-muted-foreground">
-                    {selectedTemplate?.id ?? input.template}
-                  </span>
-                </span>
-                {isSelectedTemplateFavorite ? (
-                  <FavoriteBadge label={copy.favorited} />
-                ) : null}
-              </Button>
+                  {isSelectedTemplateFavorite ? (
+                    <FavoriteBadge label={copy.favorited} />
+                  ) : null}
+                </Button>
+              )}
             </div>
             <div
               aria-label={copy.templateListLabel}
               className="hidden min-h-0 min-w-0 flex-1 flex-col gap-1 overflow-y-auto p-2 overscroll-contain lg:flex"
               ref={templateListRef}>
-              {orderedTemplates.map(template => {
-                const isSelected = input.template === template.id
-                const isFavorite = favoriteTemplateIds.includes(template.id)
-                const preview = templatePreviewUrl(template)
-                return (
-                  <Button
-                    aria-pressed={isSelected}
-                    className={`h-16 min-w-0 justify-start gap-2 overflow-hidden rounded-md p-2 text-left ${
-                      isSelected
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent'
-                        : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-                    }`}
-                    disabled={!canRender || isBusy}
-                    key={template.id}
-                    onClick={() => updateTemplate(template.id)}
-                    ref={element => {
-                      if (!element) {
-                        templateButtonRefs.current.delete(template.id)
-                        return
-                      }
-                      templateButtonRefs.current.set(template.id, element)
-                    }}
-                    type="button"
-                    variant="ghost">
-                    <span className="flex aspect-video h-10 shrink-0 items-center justify-center overflow-hidden rounded-sm border bg-muted">
-                      {preview ? (
-                        <img
-                          alt=""
-                          className="h-full w-full object-cover"
-                          src={preview}
-                        />
-                      ) : null}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-xs font-medium">
-                        {template.name}
+              {isLoadingTemplates ? (
+                <TemplateListSkeleton />
+              ) : (
+                orderedTemplates.map(template => {
+                  const isSelected = input.template === template.id
+                  const isFavorite = favoriteTemplateIds.includes(template.id)
+                  const preview = templatePreviewUrl(template)
+                  return (
+                    <Button
+                      aria-pressed={isSelected}
+                      className={`h-16 min-w-0 justify-start gap-2 overflow-hidden rounded-md p-2 text-left ${
+                        isSelected
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground hover:bg-sidebar-accent'
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                      }`}
+                      key={template.id}
+                      onClick={() => updateTemplate(template.id)}
+                      ref={element => {
+                        if (!element) {
+                          templateButtonRefs.current.delete(template.id)
+                          return
+                        }
+                        templateButtonRefs.current.set(template.id, element)
+                      }}
+                      type="button"
+                      variant="ghost">
+                      <TemplateThumbnail
+                        alt=""
+                        className="aspect-video h-10 shrink-0 rounded-sm"
+                        fallbackLabel={copy.noPreview}
+                        loading="lazy"
+                        src={preview}
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-xs font-medium">
+                          {template.name}
+                        </span>
+                        <span className="mt-1 block truncate font-mono text-[0.625rem] font-normal text-muted-foreground">
+                          {template.id}
+                        </span>
                       </span>
-                      <span className="mt-1 block truncate font-mono text-[0.625rem] font-normal text-muted-foreground">
-                        {template.id}
-                      </span>
-                    </span>
-                    {isFavorite ? <FavoriteBadge label={copy.favorited} /> : null}
-                  </Button>
-                )
-              })}
+                      {isFavorite ? <FavoriteBadge label={copy.favorited} /> : null}
+                    </Button>
+                  )
+                })
+              )}
             </div>
           </section>
 
@@ -1318,9 +1357,11 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
               <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b px-4">
                 <div
                   className={`flex min-w-0 items-center gap-1 text-xs ${
-                    isPreviewStale
-                      ? 'text-amber-700 dark:text-amber-400'
-                      : 'text-muted-foreground'
+                    previewError
+                      ? 'text-muted-foreground'
+                      : isPreviewStale
+                        ? 'text-amber-700 dark:text-amber-400'
+                        : 'text-muted-foreground'
                   }`}>
                   <h3 className="mr-1 shrink-0 text-sm font-medium text-foreground">
                     {copy.preview}
@@ -1357,14 +1398,18 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                       <StarIcon filled={isSelectedTemplateFavorite} />
                     )}
                   </Button>
-                  <span aria-live="polite" className="truncate">
-                    {isPreviewStale ? copy.previewStale : null}
+                  <span
+                    aria-live="polite"
+                    className={`truncate ${previewError ? 'text-destructive' : ''}`}>
+                    {previewError ?? (isPreviewStale ? copy.previewStale : null)}
                   </span>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
                   <GetApisDialog
                     behavior={renderBehavior}
+                    behaviorDefaults={renderBehaviorCatalog.defaults}
                     input={input}
+                    inputDefaults={inputDefaults}
                     locale={locale}
                   />
                   <Button
@@ -1411,9 +1456,14 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                   onChange={setDraftRenderBehavior}
                 />
                 <div
+                  aria-busy={isPreviewLoading}
                   className="w-full max-w-[800px] overflow-hidden rounded-lg border bg-card"
                   style={{ aspectRatio: `${image.width} / ${image.height}` }}>
-                  {previewUrl ? (
+                  {isPreviewLoading ? (
+                    <PreviewCardSkeleton
+                      label={isLoadingCatalog ? copy.loadingPreview : copy.rendering}
+                    />
+                  ) : previewUrl ? (
                     <img
                       alt={copy.previewAlt}
                       className="block h-full w-full object-cover"
@@ -1421,7 +1471,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                     />
                   ) : (
                     <div className="relative z-10 flex h-full items-center justify-center text-xs text-muted-foreground">
-                      {isLoadingTemplates ? copy.loadingPreview : copy.noPreview}
+                      {copy.noPreview}
                     </div>
                   )}
                 </div>
@@ -1453,24 +1503,17 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                         ? 'border-primary bg-primary/5 hover:bg-primary/10'
                         : 'bg-card'
                     }`}
-                    disabled={!canRender || isBusy}
                     key={template.id}
                     onClick={() => updateTemplate(template.id)}
                     type="button"
                     variant="outline">
-                    <span className="flex aspect-video w-full items-center justify-center overflow-hidden border-b bg-muted">
-                      {preview ? (
-                        <img
-                          alt={`${template.name} ${copy.templatePreviewSuffix}`}
-                          className="h-full w-full object-cover"
-                          src={preview}
-                        />
-                      ) : (
-                        <span className="text-xs font-normal text-muted-foreground">
-                          {copy.noPreview}
-                        </span>
-                      )}
-                    </span>
+                    <TemplateThumbnail
+                      alt={`${template.name} ${copy.templatePreviewSuffix}`}
+                      className="aspect-video w-full rounded-none border-x-0 border-t-0"
+                      fallbackLabel={copy.noPreview}
+                      loading="lazy"
+                      src={preview}
+                    />
                     <span className="flex w-full items-start justify-between gap-3 p-4">
                       <span className="min-w-0">
                         <span className="block text-sm font-medium">

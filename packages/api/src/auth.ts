@@ -6,7 +6,6 @@ import { jsonContentType } from './constants.js'
 
 const bearerScheme = 'bearer'
 const authenticateHeader = 'Bearer'
-const publicPaths = new Set(['/health'])
 
 const unauthorizedBody = {
   error: 'unauthorized',
@@ -28,15 +27,23 @@ const isExpectedToken = (token: string, expectedToken: string) => {
   return timingSafeEqual(received, expected)
 }
 
-export const requireBearerToken = (expectedToken: string | null) =>
+export const hasExpectedBearerToken = (
+  authorization: string | undefined,
+  expectedToken: string | null,
+) => {
+  if (expectedToken == null) return false
+  const token = bearerTokenFromHeader(authorization)
+  if (token == null) return false
+  return isExpectedToken(token, expectedToken)
+}
+
+export const requireBearerToken = (
+  allowAnonymous: boolean,
+  expectedToken: string | null,
+) =>
   async function authenticate(request: FastifyRequest, reply: FastifyReply) {
-    if (expectedToken == null) return
-
-    const [pathname = request.url] = request.url.split('?', 1)
-    if (publicPaths.has(pathname)) return
-
-    const token = bearerTokenFromHeader(request.headers.authorization)
-    if (token != null && isExpectedToken(token, expectedToken)) return
+    if (allowAnonymous) return
+    if (hasExpectedBearerToken(request.headers.authorization, expectedToken)) return
 
     return reply
       .header('WWW-Authenticate', authenticateHeader)

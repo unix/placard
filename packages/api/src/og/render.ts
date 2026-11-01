@@ -1,15 +1,26 @@
-import { prepareImages } from '@takumi-rs/helpers'
 import { fromJsx } from '@takumi-rs/helpers/jsx'
 import { createElement } from 'react'
 import type { CSSProperties, ReactElement } from 'react'
 
-import { imageHeight, imageWidth } from '../constants.js'
+import {
+  defaultRemoteImageMaxBytes,
+  defaultRemoteImageTimeoutMs,
+  imageHeight,
+  imageWidth,
+} from '../constants.js'
 import { renderTemplate } from '../templates/index.js'
 import { defaultGlobalRenderBehavior } from './behavior.js'
 import type { GlobalRenderBehavior } from './behavior.js'
 import { readyRenderer } from './fonts.js'
 import type { RenderInput } from './input.js'
+import { prepareRemoteImages } from './remote-image.js'
+import type { RemoteImageOptions } from './remote-image.js'
 import { renderContextForInput } from './render-context.js'
+
+const defaultRemoteImageOptions = {
+  maxBytes: defaultRemoteImageMaxBytes,
+  timeoutMs: defaultRemoteImageTimeoutMs,
+} satisfies RemoteImageOptions
 
 const framedRender = (
   rendered: ReactElement,
@@ -87,22 +98,25 @@ const renderNode = async (input: RenderInput, behavior: GlobalRenderBehavior) =>
 const renderResources = async (
   input: RenderInput,
   behavior: GlobalRenderBehavior,
+  remoteImages: RemoteImageOptions,
 ) => {
   const [{ node, stylesheets }, renderer] = await Promise.all([
     renderNode(input, behavior),
     readyRenderer(),
   ])
-  const images = await prepareImages({ node })
+  const images = await prepareRemoteImages(node, remoteImages)
   return { images, node, renderer, stylesheets }
 }
 
 export const renderPng = async (
   input: RenderInput,
   behavior: GlobalRenderBehavior = defaultGlobalRenderBehavior,
+  remoteImages: RemoteImageOptions = defaultRemoteImageOptions,
 ) => {
   const { images, node, renderer, stylesheets } = await renderResources(
     input,
     behavior,
+    remoteImages,
   )
   return renderer.render(node, {
     width: imageWidth,
@@ -117,10 +131,12 @@ export const renderPng = async (
 export const renderSvg = async (
   input: RenderInput,
   behavior: GlobalRenderBehavior = defaultGlobalRenderBehavior,
+  remoteImages: RemoteImageOptions = defaultRemoteImageOptions,
 ) => {
   const { images, node, renderer, stylesheets } = await renderResources(
     input,
     behavior,
+    remoteImages,
   )
   return renderer.renderSvg(node, {
     width: imageWidth,

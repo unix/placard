@@ -1,5 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 
 export const registerHealthRoutes = async (app: FastifyInstance) => {
-  app.get('/health', async () => ({ ok: true }))
+  app.get('/api/health', { config: { rateLimit: false } }, async () => ({
+    ok: true,
+  }))
 }

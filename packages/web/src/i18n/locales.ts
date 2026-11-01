@@ -1,6 +1,6 @@
 export type Locale = 'en-US' | 'zh-CN'
 
-export type SitePage = 'home' | 'how' | 'selfHost'
+export type SitePage = 'home' | 'intro'
 
 export const defaultLocale: Locale = 'en-US'
 
@@ -17,13 +17,11 @@ export const localeLabels: Record<Locale, string> = {
 const localePaths: Record<Locale, Record<SitePage, string>> = {
   'en-US': {
     home: '/',
-    how: '/how',
-    selfHost: '/self-host',
+    intro: '/intro',
   },
   'zh-CN': {
     home: '/zh',
-    how: '/zh/how',
-    selfHost: '/zh/self-host',
+    intro: '/zh/intro',
   },
 }
 

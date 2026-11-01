@@ -21,6 +21,7 @@ import {
 } from '../constants.js'
 import { customLogoId, logoForId } from '../../assets/logo/index.js'
 import { minTruncationLength, textLength, truncateText } from './text-length.js'
+import { allowedRemoteImageUrl } from './remote-image.js'
 import { templateIdForId } from '../templates/index.js'
 
 const formatSchema = z.enum(['png', 'svg']).default('png')
@@ -114,15 +115,6 @@ const inputObjectFromUnknown = (value: unknown) => {
   return { ...value, author: Reflect.get(value, 'author[]') }
 }
 
-const validUrl = (value: string) => {
-  try {
-    new URL(value)
-    return true
-  } catch {
-    return false
-  }
-}
-
 const renderInputObjectSchema = z
   .object({
     title: textField(defaultTitle),
@@ -153,10 +145,10 @@ const renderInputObjectSchema = z
       return
     }
 
-    if (validUrl(input.logoUrl)) return
+    if (allowedRemoteImageUrl(input.logoUrl)) return
     context.addIssue({
       code: 'custom',
-      message: 'Custom logo URL must be a valid URL.',
+      message: 'Custom logo URL must be a public HTTPS URL.',
       path: ['logoUrl'],
     })
   })

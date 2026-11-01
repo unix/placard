@@ -1,0 +1,441 @@
+---
+import { GitHubLink } from '@/components/github-link'
+import { ThemeToggle } from '@/components/theme-toggle'
+import MainLayout from '@/layouts/main.astro'
+
+const endpoints = [
+  ['GET /api/health', '检查服务状态'],
+  ['GET /api/templates-minify', '获取模板 ID 与名称'],
+  ['GET /api/templates', '获取模板与配置信息'],
+  ['GET /api/render.svg', '生成 SVG 图片'],
+  ['GET /api/render.png', '生成 PNG 图片'],
+  ['POST /api/render', '通过 JSON 生成 SVG 或 PNG'],
+]
+
+const parameters = [
+  [
+    'template',
+    'string',
+    'gradient-sunset',
+    '模板 ID，可通过 GET /api/templates 获取所有可用值。',
+  ],
+  ['title', 'string', 'Untitled page', '主标题，最多 160 个长度单位。'],
+  ['description', 'string', '空', '辅助说明文字，最多 260 个长度单位。'],
+  [
+    'author',
+    'string | string[]',
+    '空',
+    '作者名称。每项最多 30 个长度单位，合并后最多 50 个长度单位。URL 查询可重复传入 author 或 author[]；JSON 可以使用数组。',
+  ],
+  ['date', 'string', '空', '展示日期或日期标签，最多 80 个字符。'],
+  ['brandName', 'string', '空', '品牌或发布方名称，最多 80 个字符。'],
+  [
+    'logoId',
+    'string',
+    'none',
+    '内置 Logo ID、none 或 custom，最多 80 个字符；可通过 GET /api/templates 获取目录。',
+  ],
+  [
+    'logoUrl',
+    'string',
+    '空',
+    'logoId 为 custom 时必填，且必须是最多 500 个字符、公开可访问的 HTTPS 地址。',
+  ],
+  ['maxTitleLength', 'integer', '160', '将标题截断到 4 至 160 个长度单位。'],
+  [
+    'maxDescriptionLength',
+    'integer',
+    '260',
+    '将说明文字截断到 4 至 260 个长度单位。',
+  ],
+  [
+    'canvasColor',
+    'string',
+    'transparent',
+    '外层画布颜色，可使用 transparent 或 3、4、6、8 位十六进制颜色。',
+  ],
+  ['canvasPadding', 'integer', '0', '图片内容外边距，范围为 0 至 337。'],
+  ['canvasRadius', 'integer', '0', '外层画布圆角，范围为 0 至 337。'],
+  [
+    'contentRadius',
+    'integer | auto',
+    'auto',
+    '内容圆角，范围为 0 至 337；auto 使用 max(canvasRadius - canvasPadding, 0)。',
+  ],
+  ['seed', 'string', 'auto', '模板确定性变化所使用的种子，长度为 1 至 64 个字符。'],
+  ['lang', 'string', 'en-US', '文本语言：en-US、zh-CN、zh-TW、ja-JP 或 ko-KR。'],
+  [
+    'format',
+    'png | svg',
+    'png',
+    '仅用于 POST /api/render；GET 请求通过接口路径选择格式。',
+  ],
+]
+
+const environmentVariables = [
+  ['OG_WEB_ENABLED', 'true', '是否托管镜像内置的 Web UI；设为 false 时仅运行 API。'],
+  [
+    'OG_ALLOW_ANONYMOUS',
+    'true',
+    '是否接受无 Token 请求。设为 false 时还必须设置 OG_WEB_ENABLED=false 和 OG_INTERNAL_TOKEN。',
+  ],
+  [
+    'OG_INTERNAL_TOKEN',
+    '未设置',
+    'Bearer Token。携带正确 Token 的请求不受限流；关闭匿名流量时必须配置。',
+  ],
+  ['OG_RATE_LIMIT_MAX', '600', '每个 IP 每分钟允许的匿名图片生成请求数。'],
+  [
+    'OG_REMOTE_IMAGE_CACHE_MAX',
+    '50',
+    '每个 API 进程的远程自定义 Logo LRU 缓存数量上限。',
+  ],
+  [
+    'OG_REMOTE_IMAGE_CACHE_TTL_MS',
+    '86400000',
+    '远程自定义 Logo 的缓存时间，单位为毫秒；默认 24 小时。',
+  ],
+  [
+    'OG_REMOTE_IMAGE_MAX_BYTES',
+    '4194304',
+    '下载远程自定义 Logo 时允许的最大字节数。',
+  ],
+  [
+    'OG_REMOTE_IMAGE_TIMEOUT_MS',
+    '5000',
+    '下载远程自定义 Logo 的超时时间，单位为毫秒。',
+  ],
+  [
+    'OG_TRUST_PROXY',
+    '未设置',
+    '以逗号分隔的可信代理 IP、CIDR 或 proxy-addr 名称，例如 loopback。',
+  ],
+  ['HOST', '0.0.0.0', 'API 监听的地址。'],
+  ['PORT', '3003', 'API 在容器内监听的端口。'],
+  ['LOG_LEVEL', 'info', 'API 日志级别，例如 debug、info、warn 或 error。'],
+]
+
+const performanceResults = [
+  ['1', '465.04 请求/秒', '2.15 ms', '2 ms', '3 ms', '7 ms'],
+  ['4', '543.81 请求/秒', '7.36 ms', '7 ms', '12 ms', '21 ms'],
+  ['8', '599.27 请求/秒', '13.35 ms', '13 ms', '19 ms', '24 ms'],
+]
+
+const tableContainerClassName = 'mt-5 overflow-x-auto lg:overflow-visible'
+const tableClassName =
+  'w-full max-w-full table-fixed text-left text-sm lg:relative lg:left-1/2 lg:w-[130%] lg:max-w-none lg:-translate-x-1/2 lg:table-auto'
+const tableCodeClassName =
+  'font-mono text-xs break-all lg:break-normal lg:whitespace-nowrap'
+---
+
+<MainLayout
+  alternateOpenGraphLocale="en_US"
+  description="了解如何使用 Nore OG 为应用批量、自动化生成指定风格的卡片，以及图片渲染 API、配置参数、性能与自部署方式。"
+  imageAlt="Nore OG 服务端 Open Graph 卡片生成器"
+  lang="zh-CN"
+  openGraphLocale="zh_CN"
+  title="Nore OG 介绍 · 服务端 Open Graph 卡片生成器">
+  <header class="border-b">
+    <nav
+      aria-label="主导航"
+      class="mx-auto flex h-14 w-full max-w-4xl items-center justify-between px-4">
+      <a class="flex items-center gap-2.5" href="/zh">
+        <img
+          alt="Nore OG"
+          class="size-7 rounded-md"
+          height="28"
+          src="/logo/logo.svg"
+          width="28"
+        />
+        <span class="hidden text-sm font-medium sm:inline">Nore OG</span>
+      </a>
+      <div class="flex items-center gap-1 text-xs">
+        <a
+          class="rounded-md px-2.5 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          href="/zh">
+          应用
+        </a>
+        <a
+          aria-current="page"
+          class="rounded-md px-2.5 py-1.5 font-medium"
+          href="/zh/intro">
+          介绍
+        </a>
+        <GitHubLink locale="zh-CN" />
+        <a
+          class="rounded-md px-2.5 py-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+          href="/intro">
+          EN
+        </a>
+        <ThemeToggle locale="zh-CN" />
+      </div>
+    </nav>
+  </header>
+
+  <main class="mx-auto w-full max-w-2xl px-4 py-16 sm:py-24">
+    <section>
+      <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">
+        Open Graph 图片生成工具
+      </h1>
+      <p class="mt-5 text-sm leading-7 text-muted-foreground">
+        Nore OG
+        是一个运行在服务端的卡片生成器，适用于为应用批量、自动化地生成指定风格的卡片。它可以生成链接分享时显示的预览图：选择模板、填入标题和摘要，即可预览并下载
+        SVG 或 PNG 图片。
+      </p>
+    </section>
+
+    <section class="mt-12">
+      <h2 class="text-lg font-medium">用途</h2>
+      <p class="mt-3 text-sm leading-7 text-muted-foreground">
+        为博客文章、产品页面或更新公告生成配图。既可以手动生成单张图片，也可以通过
+        API 自动生成，让不同页面保持一致的视觉风格。
+      </p>
+    </section>
+
+    <section class="mt-12 scroll-mt-8" id="api">
+      <h2 class="text-lg font-medium">API</h2>
+      <p class="mt-3 text-sm leading-7 text-muted-foreground">
+        本站仅供演示，不保证 API 可用性。请按下方说明<a
+          class="text-foreground underline underline-offset-4"
+          href="#self-host">自部署 Nore OG</a
+        >，并使用自己的 API 地址。
+      </p>
+      <div class={tableContainerClassName}>
+        <table class={tableClassName}>
+          <thead>
+            <tr class="border-b">
+              <th class="py-3 pr-6 font-medium" scope="col">接口</th>
+              <th class="py-3 font-medium" scope="col">用途</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              endpoints.map(([endpoint, description]) => (
+                <tr class="border-b">
+                  <td class="py-3 pr-6">
+                    <code class={tableCodeClassName}>{endpoint}</code>
+                  </td>
+                  <td class="py-3 text-muted-foreground">{description}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-4 text-sm leading-7 text-muted-foreground">
+        生成图片时传入模板、标题等内容即可。GET 使用网址参数，POST 使用 JSON，并用
+        format 选择 svg 或 png。
+      </p>
+    </section>
+
+    <section class="mt-12 scroll-mt-8" id="parameters">
+      <h2 class="text-lg font-medium">参数</h2>
+      <p class="mt-3 text-sm leading-7 text-muted-foreground">
+        GET 图片生成接口通过 URL 查询参数接收以下字段；POST /api/render 在 JSON
+        对象中接收相同字段。当前默认值、限制、模板及 Logo ID 也可以通过 GET
+        /api/templates 获取。
+      </p>
+      <div class={tableContainerClassName}>
+        <table class={tableClassName}>
+          <thead>
+            <tr class="border-b">
+              <th class="py-3 pr-5 font-medium" scope="col">参数</th>
+              <th class="py-3 pr-5 font-medium" scope="col">类型</th>
+              <th class="py-3 pr-5 font-medium" scope="col">默认值</th>
+              <th class="py-3 font-medium" scope="col">作用</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              parameters.map(([name, type, defaultValue, description]) => (
+                <tr class="border-b align-top">
+                  <td class="py-3 pr-5">
+                    <code class={tableCodeClassName}>{name}</code>
+                  </td>
+                  <td class="py-3 pr-5">
+                    <code class={tableCodeClassName}>{type}</code>
+                  </td>
+                  <td class="py-3 pr-5">
+                    <code class={tableCodeClassName}>{defaultValue}</code>
+                  </td>
+                  <td class="py-3 text-muted-foreground">{description}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-4 text-sm leading-7 text-muted-foreground">
+        汉字及全角字符按两个长度单位计算，其他字符按一个长度单位计算。无效的渲染行为参数会回退到默认值，并在成功响应的
+        X-Render-Fallback-Fields 响应头中列出；无效的内容参数会返回 400。
+      </p>
+    </section>
+
+    <section class="mt-12 scroll-mt-8" id="self-host">
+      <h2 class="text-lg font-medium">自部署</h2>
+      <p class="mt-3 text-sm leading-7 text-muted-foreground">
+        获取<a
+          class="text-foreground underline underline-offset-4"
+          href="https://github.com/norehq/og">源码</a
+        >后，在仓库根目录构建并运行 Docker 镜像。镜像同时包含 Web UI 与渲染 API：
+      </p>
+      <pre
+        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker build --tag nore-og .
+docker run --detach \
+  --name nore-og \
+  --restart unless-stopped \
+  --publish 3003:3003 \
+  nore-og</code></pre>
+      <p class="mt-4 text-sm leading-7 text-muted-foreground">
+        打开 http://localhost:3003 即可使用 Web UI。浏览器通过同源的 /api 路径访问
+        API，因此 Docker 部署无需填写 API 地址。
+      </p>
+
+      <h3 class="mt-10 scroll-mt-8 text-base font-medium" id="environment">
+        环境变量
+      </h3>
+      <p class="mt-3 text-sm leading-7 text-muted-foreground">
+        使用 Docker 的 --env 或 --env-file
+        传入运行时配置。正整数配置为空或无效时，使用表中默认值。
+      </p>
+      <div class={tableContainerClassName}>
+        <table class={tableClassName}>
+          <thead>
+            <tr class="border-b">
+              <th class="py-3 pr-5 font-medium" scope="col">变量</th>
+              <th class="py-3 pr-5 font-medium" scope="col">默认值</th>
+              <th class="py-3 font-medium" scope="col">作用</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              environmentVariables.map(([name, defaultValue, description]) => (
+                <tr class="border-b align-top">
+                  <td class="py-3 pr-5">
+                    <code class={tableCodeClassName}>{name}</code>
+                  </td>
+                  <td class="py-3 pr-5">
+                    <code class={tableCodeClassName}>{defaultValue}</code>
+                  </td>
+                  <td class="py-3 text-muted-foreground">{description}</td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="mt-10 text-base font-medium">配置示例</h3>
+      <p class="mt-3 text-sm leading-7 text-muted-foreground">
+        如需仅运行 API 并拒绝匿名请求，需要同时关闭 Web UI、关闭匿名流量并配置
+        Token：
+      </p>
+      <pre
+        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
+  --name nore-og-api \
+  --restart unless-stopped \
+  --publish 3003:3003 \
+  --env OG_WEB_ENABLED=false \
+  --env OG_ALLOW_ANONYMOUS=false \
+  --env OG_INTERNAL_TOKEN=replace-with-a-secret \
+  nore-og</code></pre>
+      <p class="mt-4 text-sm leading-7 text-muted-foreground">
+        配置项较多时，可以写入环境变量文件，再交给 Docker 读取：
+      </p>
+      <pre
+        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code># nore-og.env
+OG_WEB_ENABLED=false
+OG_ALLOW_ANONYMOUS=true
+OG_INTERNAL_TOKEN=replace-with-a-secret
+OG_RATE_LIMIT_MAX=1200
+LOG_LEVEL=info</code></pre>
+      <pre
+        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
+  --name nore-og-api \
+  --restart unless-stopped \
+  --publish 3003:3003 \
+  --env-file ./nore-og.env \
+  nore-og</code></pre>
+    </section>
+
+    <section class="mt-12 scroll-mt-8" id="performance">
+      <h2 class="text-lg font-medium">性能预估</h2>
+      <p class="mt-3 text-sm leading-7 text-muted-foreground">
+        本地参考测试使用 <code>GET /api/render.svg</code> 接口和
+        <code>gradient-sunset</code> 模板，传入标题、说明、作者、品牌名称与固定种子。首次冷渲染耗时
+        101.2 ms，返回 22,512 字节的 SVG。字体和运行时预热后，每个并发级别分别发送 500
+        个 Keep-Alive 请求，结果如下，且均无失败请求：
+      </p>
+      <div class={tableContainerClassName}>
+        <table class={tableClassName}>
+          <thead>
+            <tr class="border-b">
+              <th class="py-3 pr-5 font-medium" scope="col">并发数</th>
+              <th class="py-3 pr-5 font-medium" scope="col">吞吐量</th>
+              <th class="py-3 pr-5 font-medium" scope="col">平均延迟</th>
+              <th class="py-3 pr-5 font-medium" scope="col">P50</th>
+              <th class="py-3 pr-5 font-medium" scope="col">P95</th>
+              <th class="py-3 font-medium" scope="col">P99</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              performanceResults.map(
+                ([concurrency, throughput, mean, p50, p95, p99]) => (
+                  <tr class="border-b align-top">
+                    <td class="py-3 pr-5">
+                      <code class={tableCodeClassName}>{concurrency}</code>
+                    </td>
+                    <td class="py-3 pr-5">
+                      <code class={tableCodeClassName}>{throughput}</code>
+                    </td>
+                    <td class="py-3 pr-5">
+                      <code class={tableCodeClassName}>{mean}</code>
+                    </td>
+                    <td class="py-3 pr-5">
+                      <code class={tableCodeClassName}>{p50}</code>
+                    </td>
+                    <td class="py-3 pr-5">
+                      <code class={tableCodeClassName}>{p95}</code>
+                    </td>
+                    <td class="py-3">
+                      <code class={tableCodeClassName}>{p99}</code>
+                    </td>
+                  </tr>
+                ),
+              )
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-4 text-sm leading-7 text-muted-foreground">
+        测试环境：Docker 镜像以仅 API 模式运行在 Apple Silicon 设备上（10 核 CPU、64
+        GiB 内存），容器未限制 CPU 和内存，Node.js 版本为
+        24.22.1，使用本机回环网络、关闭日志，并携带有效的 Bearer Token
+        绕过匿名限流；压测工具为
+        ApacheBench。以上数据仅供预估，不代表服务等级承诺；CPU
+        配额、模板、输入长度、并发负载与远程 Logo 下载均会影响延迟。本次未测试 PNG
+        渲染，也未计入远程 Logo 下载时间。
+      </p>
+
+      <h3 class="mt-10 text-base font-medium">性能建议</h3>
+      <p class="mt-3 text-sm leading-7 text-muted-foreground">
+        API 会动态渲染每一张 SVG 或 PNG，本身足以承载大多数场景的需求。内置的远程
+        Logo 缓存只负责避免重复下载原始图片，并不会缓存最终渲染结果。GET 渲染接口返回
+        <code>Cache-Control: public, max-age=300</code
+        >，因此上游缓存可以将包含查询参数的完整请求 URL
+        作为缓存键，在五分钟内复用相同结果。
+      </p>
+      <p class="mt-3 text-sm leading-7 text-muted-foreground">
+        对延迟敏感、同一图片会被频繁读取或 API 采用多实例部署时，建议在 API
+        前增加共享的响应缓存层，例如 Nginx 等支持缓存的反向代理、安装缓存插件的
+        Caddy，或配置 Cloudflare 等 CDN 缓存这些 GET 响应。缓存命中后，请求无需进入
+        Node.js
+        进程，可以避免反复渲染相同内容。缓存时间应根据内容更新频率设置；需要立即更新图片时，可修改版本化
+        URL
+        或主动清除上游缓存。关闭匿名访问时，还必须确保先鉴权、再查缓存，或隔离受保护响应，避免共享缓存绕过
+        Token 要求。
+      </p>
+    </section>
+  </main>
+</MainLayout>

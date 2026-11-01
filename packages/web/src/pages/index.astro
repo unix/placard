@@ -4,8 +4,12 @@ import MainLayout from '@/layouts/main.astro'
 ---
 
 <MainLayout
-  description="Nore OG is a self-hosted Open Graph image generator with templates, content presets, and SVG or PNG downloads."
-  title="Nore OG">
+  alternateOpenGraphLocale="zh_CN"
+  description="Generate branded Open Graph cards automatically and at scale from templates. Self-host Nore OG and render SVG or PNG images through its web UI or API."
+  imageAlt="Nore OG server-side Open Graph card generator"
+  lang="en-US"
+  openGraphLocale="en_US"
+  title="Nore OG · Server-side Open Graph Card Generator">
   <main class="h-svh min-h-0 overflow-hidden">
     <TemplateGallery client:only="react" locale="en-US" />
   </main>

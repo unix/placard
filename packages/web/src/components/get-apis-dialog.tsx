@@ -18,9 +18,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { type Locale, LocalePath } from '@/i18n/locales'
-import { apiBaseUrl, type GlobalRenderBehavior, type RenderInput } from '@/lib/api'
+import { type GlobalRenderBehavior, type RenderInput } from '@/lib/api'
 
 type ApiSnippetFormat = 'curl' | 'fetch' | 'url' | 'xhr'
+type ApiParameterValue = number | string | readonly string[]
 type CopyStatus = 'copied' | 'copying' | 'failed' | 'idle'
 
 const apiSnippetFormats = [
@@ -40,12 +41,12 @@ const getApisDialogLocales = {
     copy: 'Copy',
     copyFailed: 'Copy failed',
     description:
-      'Choose an integration format, then copy a ready-to-use request for the current image.',
+      'Choose an integration format, then copy an example request for the current image.',
     dialogTitle: 'Get APIs',
     format: 'Code',
     hostNotice:
-      'This API host is intended only for testing and sharing, and requests are rate-limited. For production traffic, self-host Nore OG for stable, controllable capacity.',
-    hostNoticeTitle: 'Testing host with limited frequency',
+      'This API host is for demonstration only, with no availability guarantee. Self-host Nore OG and use your own API address for integrations.',
+    hostNoticeTitle: 'Demo API',
     selfHost: 'Self-hosting guide',
   },
   'zh-CN': {
@@ -55,12 +56,12 @@ const getApisDialogLocales = {
     copying: '复制中…',
     copy: '复制',
     copyFailed: '复制失败',
-    description: '选择接入格式，然后复制基于当前图片配置生成的请求。',
+    description: '选择接入格式，然后复制基于当前图片配置生成的示例请求。',
     dialogTitle: 'Get APIs',
     format: '代码',
     hostNotice:
-      '当前 API Host 仅供测试与分享，并有请求频率限制。生产环境建议自部署 Nore OG，以获得稳定、可控的容量。',
-    hostNoticeTitle: '有限频率的测试 Host',
+      '当前 API Host 仅用于演示，不保证可用性。请自部署 Nore OG，并使用自己的 API 地址接入。',
+    hostNoticeTitle: '演示 API',
     selfHost: '自部署指南',
   },
 } as const satisfies Record<Locale, Record<string, string>>
@@ -124,54 +125,86 @@ const SpinnerIcon = (props: SVGProps<SVGSVGElement>) => (
 const isApiSnippetFormat = (value: string | null): value is ApiSnippetFormat =>
   apiSnippetFormats.some(format => format.value === value)
 
-const apiHost = new URL(apiBaseUrl).host
+const sameParameterValue = (
+  value: ApiParameterValue,
+  defaultValue: ApiParameterValue | undefined,
+) => {
+  if (!Array.isArray(value) || !Array.isArray(defaultValue))
+    return value === defaultValue
+  return (
+    value.length === defaultValue.length &&
+    value.every((item, index) => item === defaultValue[index])
+  )
+}
 
-const normalizedInput = (input: RenderInput, behavior: GlobalRenderBehavior) => ({
-  template: input.template,
-  title: input.title,
-  description: input.description,
-  author: input.author,
-  date: input.date,
-  brandName: input.brandName,
-  logoId: input.logoId,
-  logoUrl: input.logoUrl,
-  canvasColor: behavior.canvasColor,
-  canvasPadding: behavior.canvasPadding,
-  canvasRadius: behavior.canvasRadius,
-  contentRadius: behavior.contentRadius,
-  seed: behavior.seed,
-  lang: behavior.lang,
-})
+const requestParameters = (
+  input: RenderInput,
+  behavior: GlobalRenderBehavior,
+  inputDefaults: RenderInput,
+  behaviorDefaults: GlobalRenderBehavior,
+) => {
+  const parameters: Record<string, ApiParameterValue> = {
+    template: input.template,
+    title: input.title,
+    description: input.description,
+    author: input.author,
+    date: input.date,
+    brandName: input.brandName,
+    logoId: input.logoId,
+    logoUrl: input.logoUrl,
+    canvasColor: behavior.canvasColor,
+    canvasPadding: behavior.canvasPadding,
+    canvasRadius: behavior.canvasRadius,
+    contentRadius: behavior.contentRadius,
+    seed: behavior.seed,
+    lang: behavior.lang,
+  }
+  const defaults: Record<string, ApiParameterValue> = {
+    template: inputDefaults.template,
+    title: inputDefaults.title,
+    description: inputDefaults.description,
+    author: inputDefaults.author,
+    date: inputDefaults.date,
+    brandName: inputDefaults.brandName,
+    logoId: inputDefaults.logoId,
+    logoUrl: inputDefaults.logoUrl,
+    canvasColor: behaviorDefaults.canvasColor,
+    canvasPadding: behaviorDefaults.canvasPadding,
+    canvasRadius: behaviorDefaults.canvasRadius,
+    contentRadius: behaviorDefaults.contentRadius,
+    seed: behaviorDefaults.seed,
+    lang: behaviorDefaults.lang,
+  }
+  return Object.fromEntries(
+    Object.entries(parameters).filter(
+      ([key, value]) => !sameParameterValue(value, defaults[key]),
+    ),
+  )
+}
 
 const shellSingleQuoted = (value: string) => value.replaceAll("'", "'\\''")
 
 const requestJson = (
-  input: RenderInput,
-  behavior: GlobalRenderBehavior,
+  parameters: Readonly<Record<string, ApiParameterValue>>,
   spacing?: number,
-) =>
-  JSON.stringify(
-    { ...normalizedInput(input, behavior), format: 'svg' },
-    null,
-    spacing,
-  )
+) => JSON.stringify({ ...parameters, format: 'svg' }, null, spacing)
 
 const curlSnippet = (
-  input: RenderInput,
-  behavior: GlobalRenderBehavior,
-) => `curl '${apiBaseUrl}/api/render' \\
+  parameters: Readonly<Record<string, ApiParameterValue>>,
+  origin: string,
+) => `curl '${origin}/api/render' \\
   --request POST \\
   --header 'Accept: image/svg+xml' \\
   --header 'Content-Type: application/json' \\
-  --data '${shellSingleQuoted(requestJson(input, behavior))}' \\
+  --data '${shellSingleQuoted(requestJson(parameters))}' \\
   --output open-graph.svg`
 
 const fetchSnippet = (
-  input: RenderInput,
-  behavior: GlobalRenderBehavior,
-) => `const payload = ${requestJson(input, behavior, 2)}
+  parameters: Readonly<Record<string, ApiParameterValue>>,
+  origin: string,
+) => `const payload = ${requestJson(parameters, 2)}
 
-const response = await fetch('${apiBaseUrl}/api/render', {
+const response = await fetch('${origin}/api/render', {
   method: 'POST',
   headers: {
     Accept: 'image/svg+xml',
@@ -184,12 +217,12 @@ if (!response.ok) throw new Error(\`API returned \${response.status}\`)
 const image = await response.blob()`
 
 const xhrSnippet = (
-  input: RenderInput,
-  behavior: GlobalRenderBehavior,
-) => `const payload = ${requestJson(input, behavior, 2)}
+  parameters: Readonly<Record<string, ApiParameterValue>>,
+  origin: string,
+) => `const payload = ${requestJson(parameters, 2)}
 const request = new XMLHttpRequest()
 
-request.open('POST', '${apiBaseUrl}/api/render')
+request.open('POST', '${origin}/api/render')
 request.setRequestHeader('Accept', 'image/svg+xml')
 request.setRequestHeader('Content-Type', 'application/json')
 request.responseType = 'blob'
@@ -202,9 +235,12 @@ request.addEventListener('load', () => {
 })
 request.send(JSON.stringify(payload))`
 
-const imageUrlSnippet = (input: RenderInput, behavior: GlobalRenderBehavior) => {
-  const url = new URL(`${apiBaseUrl}/render.svg`)
-  Object.entries(normalizedInput(input, behavior)).forEach(([key, value]) => {
+const imageUrlSnippet = (
+  parameters: Readonly<Record<string, ApiParameterValue>>,
+  origin: string,
+) => {
+  const url = new URL('/api/render.svg', origin)
+  Object.entries(parameters).forEach(([key, value]) => {
     if (Array.isArray(value)) {
       value.forEach(item => url.searchParams.append(key, item))
       return
@@ -217,13 +253,13 @@ const imageUrlSnippet = (input: RenderInput, behavior: GlobalRenderBehavior) => 
 
 const apiSnippet = (
   format: ApiSnippetFormat,
-  input: RenderInput,
-  behavior: GlobalRenderBehavior,
+  parameters: Readonly<Record<string, ApiParameterValue>>,
+  origin: string,
 ) => {
-  if (format === 'fetch') return fetchSnippet(input, behavior)
-  if (format === 'xhr') return xhrSnippet(input, behavior)
-  if (format === 'url') return imageUrlSnippet(input, behavior)
-  return curlSnippet(input, behavior)
+  if (format === 'fetch') return fetchSnippet(parameters, origin)
+  if (format === 'xhr') return xhrSnippet(parameters, origin)
+  if (format === 'url') return imageUrlSnippet(parameters, origin)
+  return curlSnippet(parameters, origin)
 }
 
 const copyText = async (value: string) => {
@@ -233,18 +269,32 @@ const copyText = async (value: string) => {
 
 interface GetApisDialogProps {
   readonly behavior: GlobalRenderBehavior
+  readonly behaviorDefaults: GlobalRenderBehavior
   readonly input: RenderInput
+  readonly inputDefaults: RenderInput
   readonly locale: Locale
 }
 
-const GetApisDialog = ({ behavior, input, locale }: GetApisDialogProps) => {
+const GetApisDialog = ({
+  behavior,
+  behaviorDefaults,
+  input,
+  inputDefaults,
+  locale,
+}: GetApisDialogProps) => {
   const copy = getApisDialogLocales[locale]
+  const origin = window.location.origin
+  const apiHost = window.location.host
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle')
   const [format, setFormat] = useState<ApiSnippetFormat>('curl')
   const [isOpen, setIsOpen] = useState(false)
+  const parameters = useMemo(
+    () => requestParameters(input, behavior, inputDefaults, behaviorDefaults),
+    [behavior, behaviorDefaults, input, inputDefaults],
+  )
   const snippet = useMemo(
-    () => apiSnippet(format, input, behavior),
-    [behavior, format, input],
+    () => apiSnippet(format, parameters, origin),
+    [format, origin, parameters],
   )
 
   useEffect(() => {
@@ -312,7 +362,7 @@ const GetApisDialog = ({ behavior, input, locale }: GetApisDialogProps) => {
                 {copy.hostNotice}{' '}
                 <a
                   className="inline-flex items-center gap-1 font-medium underline underline-offset-2"
-                  href={LocalePath(locale, 'selfHost')}>
+                  href={`${LocalePath(locale, 'intro')}#self-host`}>
                   {copy.selfHost}
                   <OpenPageIcon className="size-3" />
                 </a>
@@ -372,13 +422,13 @@ const GetApisDialog = ({ behavior, input, locale }: GetApisDialogProps) => {
             <div className="flex flex-wrap items-center gap-2">
               <a
                 className={buttonVariants({ variant: 'outline' })}
-                href={`${LocalePath(locale, 'how')}#api`}>
+                href={`${LocalePath(locale, 'intro')}#api`}>
                 {copy.apiReference}
                 <OpenPageIcon data-icon="inline-end" />
               </a>
               <a
                 className={buttonVariants({ variant: 'ghost' })}
-                href={LocalePath(locale, 'selfHost')}>
+                href={`${LocalePath(locale, 'intro')}#self-host`}>
                 {copy.selfHost}
                 <OpenPageIcon data-icon="inline-end" />
               </a>

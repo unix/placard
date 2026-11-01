@@ -1,35 +1,13 @@
 import type { ReactElement, ReactNode } from 'react'
 
-import type { RenderInput } from '../og/input.js'
 import type { RenderContext } from '../og/render-context.js'
-import { textLength } from '../og/text-length.js'
 import {
-  brandText,
-  cardStyle,
-  descriptionText,
-  MetaLine,
-  px,
-  sansFontFamily,
-  TextBlock,
-  titleLineHeight,
-  titleSize,
-  titleText,
-} from './shared.js'
-import type { OgTemplate, OgTemplateMeta } from './types.js'
-
-const centeredGradientFields = [
-  'brandName',
-] as const satisfies OgTemplateMeta['fields']
-
-const storyGradientFields = [
-  'brandName',
-  'title',
-  'description',
-  'author',
-  'date',
-] as const satisfies OgTemplateMeta['fields']
-
-type GradientLayout = 'bottom' | 'centered' | 'editorial' | 'split' | 'stacked'
+  fieldsForKnownTemplateStyle,
+  renderKnownTemplateStyle,
+  type KnownTemplateStyle,
+} from './known-template-styles.js'
+import { cardStyle, sansFontFamily } from './shared.js'
+import type { OgTemplate } from './types.js'
 
 interface GradientLayer {
   readonly backgroundImage: string
@@ -48,7 +26,6 @@ interface GradientPreset {
   readonly backgroundImage: string
   readonly drift: GradientDrift
   readonly layers?: readonly GradientLayer[]
-  readonly lineColor: string
   readonly mutedTextColor: string
   readonly textColor: string
 }
@@ -56,21 +33,9 @@ interface GradientPreset {
 interface GradientTemplateDefinition {
   readonly description: string
   readonly id: string
-  readonly layout: GradientLayout
   readonly name: string
   readonly preset: GradientPreset
-}
-
-interface GradientContentProps {
-  readonly input: RenderInput
-  readonly preset: GradientPreset
-}
-
-const brandNameSize = (name: string) => {
-  const length = textLength(name)
-  if (length > 60) return px(54)
-  if (length > 36) return px(68)
-  return px(88)
+  readonly style: KnownTemplateStyle
 }
 
 const seededOffset = (random: () => number, maximum: number) =>
@@ -182,328 +147,23 @@ const GradientFrame = ({
   )
 }
 
-const GradientBrand = ({ input, preset }: GradientContentProps) => {
-  const brand = brandText(input)
-  if (!brand) return null
-
-  return (
-    <TextBlock
-      color={preset.textColor}
-      fontSize={px(22)}
-      fontWeight={650}
-      letterSpacing={0.2}
-      lineHeight={1.1}
-      style={{ lineClamp: 1, maxWidth: px(420) }}>
-      {brand}
-    </TextBlock>
-  )
-}
-
-const GradientHeader = ({ input, preset }: GradientContentProps) => (
-  <div
-    style={{
-      display: 'flex',
-      minHeight: px(34),
-      alignItems: 'center',
-      justifyContent: 'space-between',
-    }}>
-    <GradientBrand input={input} preset={preset} />
-    <MetaLine
-      color={preset.mutedTextColor}
-      input={input}
-      separatorColor={preset.lineColor}
-      size={18}
-    />
-  </div>
-)
-
-const GradientDescription = ({
-  input,
-  preset,
-  textAlign = 'left',
-  width,
-}: GradientContentProps & {
-  readonly textAlign?: 'center' | 'left'
-  readonly width: number
-}) => {
-  const description = descriptionText(input)
-  if (!description) return null
-
-  return (
-    <TextBlock
-      color={preset.mutedTextColor}
-      fontSize={px(25)}
-      fontWeight={480}
-      lineHeight={1.35}
-      style={{ lineClamp: 3, textAlign, width: px(width) }}>
-      {description}
-    </TextBlock>
-  )
-}
-
-const CenteredGradientContent = ({ input, preset }: GradientContentProps) => {
-  const brand = brandText(input)
-  if (!brand) return null
-
-  const isCompactBrand = textLength(brand) <= 24
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        width: '100%',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-      <div
-        style={{
-          display: 'flex',
-          width: px(1020),
-          justifyContent: 'center',
-        }}>
-        <TextBlock
-          color={preset.textColor}
-          fontSize={brandNameSize(brand)}
-          fontWeight={700}
-          letterSpacing={-1.8}
-          lineHeight={1.05}
-          style={{
-            maxWidth: px(1020),
-            textAlign: 'center',
-            ...(isCompactBrand ? {} : { width: px(1020) }),
-          }}>
-          {brand}
-        </TextBlock>
-      </div>
-    </div>
-  )
-}
-
-const EditorialGradientContent = ({ input, preset }: GradientContentProps) => {
-  const title = titleText(input)
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        width: '100%',
-        height: '100%',
-        flexDirection: 'column',
-        padding: px(64),
-      }}>
-      <GradientHeader input={input} preset={preset} />
-      <div
-        style={{
-          display: 'flex',
-          flex: 1,
-          flexDirection: 'column',
-          justifyContent: 'center',
-        }}>
-        <div
-          style={{
-            display: 'flex',
-            width: px(72),
-            height: px(4),
-            backgroundColor: preset.lineColor,
-            marginBottom: px(28),
-          }}
-        />
-        <TextBlock
-          color={preset.textColor}
-          fontSize={titleSize(title, { large: 80, medium: 66, small: 52 })}
-          fontWeight={700}
-          letterSpacing={-1.4}
-          lineHeight={titleLineHeight(title, 1.02)}
-          style={{ textWrap: 'balance', width: px(900) }}>
-          {title}
-        </TextBlock>
-        <div style={{ display: 'flex', marginTop: px(24) }}>
-          <GradientDescription input={input} preset={preset} width={760} />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const SplitGradientContent = ({ input, preset }: GradientContentProps) => {
-  const title = titleText(input)
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        width: '100%',
-        height: '100%',
-        flexDirection: 'column',
-        padding: px(64),
-      }}>
-      <GradientHeader input={input} preset={preset} />
-      <div
-        style={{
-          display: 'flex',
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-        <TextBlock
-          color={preset.textColor}
-          fontSize={titleSize(title, { large: 78, medium: 64, small: 50 })}
-          fontWeight={720}
-          letterSpacing={-1.6}
-          lineHeight={titleLineHeight(title, 1.02)}
-          style={{ textWrap: 'balance', width: px(690) }}>
-          {title}
-        </TextBlock>
-        <div
-          style={{
-            display: 'flex',
-            width: px(340),
-            minHeight: px(190),
-            alignItems: 'center',
-            borderLeft: `${px(1)}px solid ${preset.lineColor}`,
-            paddingLeft: px(30),
-          }}>
-          <GradientDescription input={input} preset={preset} width={300} />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const StackedGradientContent = ({ input, preset }: GradientContentProps) => {
-  const title = titleText(input)
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        width: '100%',
-        height: '100%',
-        flexDirection: 'column',
-        alignItems: 'center',
-        padding: px(64),
-      }}>
-      <GradientBrand input={input} preset={preset} />
-      <div
-        style={{
-          display: 'flex',
-          flex: 1,
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-        <TextBlock
-          color={preset.textColor}
-          fontSize={titleSize(title, { large: 72, medium: 60, small: 48 })}
-          fontWeight={680}
-          letterSpacing={-1.2}
-          lineHeight={titleLineHeight(title, 1.04)}
-          style={{
-            textAlign: 'center',
-            textWrap: 'balance',
-            width: px(920),
-          }}>
-          {title}
-        </TextBlock>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: px(24),
-          }}>
-          <GradientDescription
-            input={input}
-            preset={preset}
-            textAlign="center"
-            width={720}
-          />
-        </div>
-      </div>
-      <MetaLine
-        color={preset.mutedTextColor}
-        input={input}
-        separatorColor={preset.lineColor}
-        size={18}
-      />
-    </div>
-  )
-}
-
-const BottomGradientContent = ({ input, preset }: GradientContentProps) => {
-  const title = titleText(input)
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        width: '100%',
-        height: '100%',
-        flexDirection: 'column',
-        padding: px(64),
-      }}>
-      <GradientHeader input={input} preset={preset} />
-      <div
-        style={{
-          display: 'flex',
-          flex: 1,
-          alignItems: 'flex-end',
-          justifyContent: 'space-between',
-          paddingBottom: px(8),
-        }}>
-        <TextBlock
-          color={preset.textColor}
-          fontSize={titleSize(title, { large: 76, medium: 62, small: 48 })}
-          fontWeight={700}
-          letterSpacing={-1.4}
-          lineHeight={titleLineHeight(title, 1.02)}
-          style={{ textWrap: 'balance', width: px(740) }}>
-          {title}
-        </TextBlock>
-        <div
-          style={{
-            display: 'flex',
-            width: px(330),
-            borderTop: `${px(1)}px solid ${preset.lineColor}`,
-            paddingTop: px(20),
-          }}>
-          <GradientDescription input={input} preset={preset} width={330} />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const GradientContent = ({
-  input,
-  layout,
-  preset,
-}: GradientContentProps & { readonly layout: GradientLayout }) => {
-  if (layout === 'centered')
-    return <CenteredGradientContent input={input} preset={preset} />
-  if (layout === 'editorial')
-    return <EditorialGradientContent input={input} preset={preset} />
-  if (layout === 'split')
-    return <SplitGradientContent input={input} preset={preset} />
-  if (layout === 'stacked')
-    return <StackedGradientContent input={input} preset={preset} />
-  return <BottomGradientContent input={input} preset={preset} />
-}
-
 const defineGradientTemplate = ({
   description,
   id,
-  layout,
   name,
   preset,
+  style,
 }: GradientTemplateDefinition): OgTemplate => ({
   description,
-  fields: layout === 'centered' ? centeredGradientFields : storyGradientFields,
+  fields: fieldsForKnownTemplateStyle(style),
   id,
   name,
   render: (input, context) => (
     <GradientFrame preset={preset} random={context.random}>
-      <GradientContent input={input} layout={layout} preset={preset} />
+      {renderKnownTemplateStyle(style, input, {
+        foreground: preset.textColor,
+        secondary: preset.mutedTextColor,
+      })}
     </GradientFrame>
   ),
 })
@@ -513,8 +173,8 @@ export const gradientTemplates = [
     id: 'gradient-midnight',
     name: 'Gradient Midnight',
     description:
-      'Deep navy and violet gradient card with a centered brand statement.',
-    layout: 'centered',
+      'Deep navy and violet gradient card with a centered title composition.',
+    style: 'centered',
     preset: {
       backgroundColor: '#030712',
       backgroundImage:
@@ -532,7 +192,6 @@ export const gradientTemplates = [
           opacity: 1,
         },
       ],
-      lineColor: 'rgba(248, 250, 252, 0.28)',
       mutedTextColor: '#cbd5e1',
       textColor: '#f8fafc',
     },
@@ -541,8 +200,8 @@ export const gradientTemplates = [
     id: 'gradient-aurora',
     name: 'Gradient Aurora',
     description:
-      'Layered teal, cyan, and violet editorial card with generous left alignment.',
-    layout: 'editorial',
+      'Layered teal, cyan, and violet card with a logo-led title and summary.',
+    style: 'float-summary',
     preset: {
       backgroundColor: '#042f2e',
       backgroundImage:
@@ -560,7 +219,6 @@ export const gradientTemplates = [
           opacity: 0.72,
         },
       ],
-      lineColor: 'rgba(240, 253, 250, 0.32)',
       mutedTextColor: '#ccfbf1',
       textColor: '#f0fdfa',
     },
@@ -569,8 +227,8 @@ export const gradientTemplates = [
     id: 'gradient-prism',
     name: 'Gradient Prism',
     description:
-      'Vivid cyan, magenta, and gold feature card with a split content layout.',
-    layout: 'split',
+      'Vivid cyan, magenta, and gold card with a centered title composition.',
+    style: 'title',
     preset: {
       backgroundColor: '#fc7efc',
       backgroundImage:
@@ -588,7 +246,6 @@ export const gradientTemplates = [
           opacity: 0.7,
         },
       ],
-      lineColor: 'rgba(17, 24, 39, 0.28)',
       mutedTextColor: '#312e81',
       textColor: '#111827',
     },
@@ -598,7 +255,7 @@ export const gradientTemplates = [
     name: 'Gradient Sunset',
     description:
       'Warm plum, coral, and apricot story card with bottom-anchored content.',
-    layout: 'bottom',
+    style: 'float',
     preset: {
       backgroundColor: '#e11d48',
       backgroundImage:
@@ -616,7 +273,6 @@ export const gradientTemplates = [
           opacity: 0.78,
         },
       ],
-      lineColor: 'rgba(255, 247, 237, 0.34)',
       mutedTextColor: '#ffedd5',
       textColor: '#fff7ed',
     },
@@ -625,8 +281,8 @@ export const gradientTemplates = [
     id: 'gradient-mist',
     name: 'Gradient Mist',
     description:
-      'Airy pearl, lavender, and sky story card with centered title and summary.',
-    layout: 'stacked',
+      'Airy pearl, lavender, and sky card with a centered title composition.',
+    style: 'centered',
     preset: {
       backgroundColor: '#f8fafc',
       backgroundImage:
@@ -644,7 +300,6 @@ export const gradientTemplates = [
           opacity: 0.84,
         },
       ],
-      lineColor: 'rgba(30, 27, 75, 0.2)',
       mutedTextColor: '#475569',
       textColor: '#1e1b4b',
     },
@@ -652,9 +307,8 @@ export const gradientTemplates = [
   defineGradientTemplate({
     id: 'gradient-horizon',
     name: 'Gradient Horizon',
-    description:
-      'Layered ocean and indigo story card with a luminous horizontal atmosphere.',
-    layout: 'bottom',
+    description: 'Layered ocean and indigo story card with bottom-anchored content.',
+    style: 'float',
     preset: {
       backgroundColor: '#020617',
       backgroundImage:
@@ -677,7 +331,6 @@ export const gradientTemplates = [
           opacity: 0.78,
         },
       ],
-      lineColor: 'rgba(240, 249, 255, 0.34)',
       mutedTextColor: '#e0f2fe',
       textColor: '#f0f9ff',
     },
@@ -686,8 +339,8 @@ export const gradientTemplates = [
     id: 'gradient-mono',
     name: 'Gradient Mono',
     description:
-      'Layered graphite, silver, and cool-gray editorial card with metallic depth.',
-    layout: 'editorial',
+      'Layered graphite and silver card with a title-first reverse composition.',
+    style: 'float-reverse',
     preset: {
       backgroundColor: '#09090b',
       backgroundImage:
@@ -710,7 +363,6 @@ export const gradientTemplates = [
           opacity: 0.76,
         },
       ],
-      lineColor: 'rgba(250, 250, 250, 0.34)',
       mutedTextColor: '#e4e4e7',
       textColor: '#fafafa',
     },
