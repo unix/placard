@@ -24,6 +24,8 @@ type ApiSnippetFormat = 'curl' | 'fetch' | 'url' | 'xhr'
 type ApiParameterValue = number | string | readonly string[]
 type CopyStatus = 'copied' | 'copying' | 'failed' | 'idle'
 
+const demoApiOrigin = 'http://127.0.0.1:3003'
+
 const apiSnippetFormats = [
   { label: 'cURL', value: 'curl' },
   { label: 'Fetch', value: 'fetch' },
@@ -283,7 +285,10 @@ const GetApisDialog = ({
   locale,
 }: GetApisDialogProps) => {
   const copy = getApisDialogLocales[locale]
-  const origin = window.location.origin
+  const origin =
+    window.location.hostname === 'placard.witt.im'
+      ? demoApiOrigin
+      : window.location.origin
   const apiHost = window.location.host
   const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle')
   const [format, setFormat] = useState<ApiSnippetFormat>('curl')
