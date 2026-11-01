@@ -10,7 +10,8 @@ import MainLayout from '@/layouts/main.astro'
   lang="en-US"
   openGraphLocale="en_US"
   title="Placard · Open-source Social Image Renderer">
-  <main class="h-svh min-h-0 overflow-hidden">
+  <main
+    class="h-svh min-h-0 overflow-hidden max-lg:h-auto max-lg:min-h-dvh max-lg:overflow-visible">
     <TemplateGallery client:only="react" locale="en-US" />
   </main>
 </MainLayout>
@@ -21,5 +22,15 @@ import MainLayout from '@/layouts/main.astro'
     height: 100%;
     overflow: hidden;
     overscroll-behavior: none;
+  }
+
+  @media (max-width: 63.999rem) {
+    html,
+    body {
+      height: auto;
+      min-height: 100%;
+      overflow: visible;
+      overscroll-behavior: auto;
+    }
   }
 </style>

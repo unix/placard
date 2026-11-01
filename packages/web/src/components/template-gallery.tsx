@@ -639,6 +639,18 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
   const previewRequestControllerRef = useRef<AbortController | null>(null)
   const previewRequestIdRef = useRef(0)
 
+  useEffect(() => {
+    const desktopMedia = window.matchMedia('(min-width: 64rem)')
+    const resetDesktopScroll = () => {
+      if (!desktopMedia.matches) return
+      window.scrollTo({ left: 0, top: 0 })
+    }
+
+    resetDesktopScroll()
+    desktopMedia.addEventListener('change', resetDesktopScroll)
+    return () => desktopMedia.removeEventListener('change', resetDesktopScroll)
+  }, [])
+
   const selectedTemplate = useMemo(
     () => templates.find(template => template.id === input.template) ?? null,
     [input.template, templates],
@@ -1050,8 +1062,8 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
     <>
       <section
         aria-label={copy.workbenchLabel}
-        className="flex h-full min-h-0 max-w-full flex-col overflow-hidden bg-background">
-        <div className="flex h-14 min-w-0 shrink-0 items-center justify-between gap-2 border-b px-3 sm:gap-4 sm:px-4">
+        className="placard-workbench flex h-full min-h-0 max-w-full flex-col overflow-hidden bg-background max-lg:h-auto max-lg:min-h-dvh max-lg:overflow-visible max-lg:pb-[calc(4.75rem+env(safe-area-inset-bottom))] max-lg:[&_[data-slot=button]]:min-h-10 max-lg:[&_[data-slot=button]]:min-w-10 max-lg:[&_[data-slot=input]]:h-10 max-lg:[&_[data-slot=input]]:px-3 max-lg:[&_[data-slot=input]]:text-base max-lg:[&_[data-slot=select-trigger]]:h-10 max-lg:[&_[data-slot=select-trigger]]:px-3 max-lg:[&_[data-slot=select-trigger]]:text-base max-lg:[&_textarea[data-slot=textarea]]:min-h-20 max-lg:[&_textarea[data-slot=textarea]]:px-3 max-lg:[&_textarea[data-slot=textarea]]:text-base">
+        <div className="flex h-14 min-w-0 shrink-0 items-center justify-between gap-2 border-b px-3 sm:gap-4 sm:px-4 max-lg:sticky max-lg:top-0 max-lg:z-30 max-lg:bg-background">
           <div className="flex min-w-0 items-center gap-2.5">
             <img
               alt="Placard"
@@ -1067,18 +1079,18 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
             className="flex min-w-0 items-center gap-0.5 text-xs sm:gap-1">
             <a
               aria-current="page"
-              className="rounded-md px-2.5 py-1.5 font-medium text-foreground"
+              className="rounded-md px-2.5 py-1.5 font-medium text-foreground max-lg:hidden"
               href={LocalePath(locale, 'home')}>
               {copy.home}
             </a>
             <a
-              className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground max-lg:inline-flex max-lg:h-10 max-lg:items-center"
               href={LocalePath(locale, 'intro')}>
               {copy.intro}
             </a>
             <GitHubLink locale={locale} />
             <a
-              className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground max-lg:inline-flex max-lg:h-10 max-lg:items-center"
               href={LocalePath(locale === 'en-US' ? 'zh-CN' : 'en-US', 'home')}>
               {copy.language}
             </a>
@@ -1086,10 +1098,10 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
           </nav>
         </div>
 
-        <div className="grid min-h-0 min-w-0 flex-1 grid-rows-[96px_minmax(0,1fr)] overflow-hidden lg:grid-cols-[240px_minmax(0,1fr)] lg:grid-rows-1">
+        <div className="grid min-h-0 min-w-0 flex-1 grid-rows-[96px_minmax(0,1fr)] overflow-hidden max-lg:flex max-lg:min-h-fit max-lg:flex-col max-lg:overflow-visible lg:grid-cols-[240px_minmax(0,1fr)] lg:grid-rows-1">
           <section
             aria-label={copy.templateSectionLabel}
-            className="flex min-h-0 min-w-0 flex-col overflow-hidden border-b bg-sidebar lg:border-r lg:border-b-0">
+            className="flex min-h-0 min-w-0 flex-col overflow-hidden border-b bg-sidebar max-lg:min-h-fit max-lg:overflow-visible lg:border-r lg:border-b-0">
             <div className="flex h-10 shrink-0 items-center justify-between gap-3 px-4">
               <div className="flex min-w-0 items-center gap-2">
                 <h2 className="text-xs font-medium">{copy.templates}</h2>
@@ -1192,13 +1204,15 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
             </div>
           </section>
 
-          <div className="grid min-h-0 min-w-0 grid-rows-[minmax(250px,0.85fr)_minmax(0,1fr)] overflow-hidden lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-1">
+          <div className="grid min-h-0 min-w-0 grid-rows-[minmax(250px,0.85fr)_minmax(0,1fr)] overflow-hidden max-lg:flex max-lg:min-h-fit max-lg:flex-col max-lg:overflow-visible lg:grid-cols-[minmax(0,1fr)_360px] lg:grid-rows-1">
             <form
-              className="order-2 flex min-h-0 min-w-0 flex-col overflow-hidden border-t bg-card lg:border-t-0 lg:border-l"
+              className="order-2 flex min-h-0 min-w-0 flex-col overflow-hidden border-t bg-card max-lg:min-h-fit max-lg:overflow-visible lg:border-t-0 lg:border-l"
+              id="placard-render-form"
               onSubmit={handleSubmit}>
               <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b px-4">
                 <h3 className="text-sm font-medium">{copy.operationArea}</h3>
                 <RenderButton
+                  className="max-lg:hidden"
                   disabled={!canRender || isBusy}
                   isLoading={isRendering}
                   label={isPreviewStale ? copy.updatePreview : copy.renderAgain}
@@ -1207,8 +1221,8 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                 />
               </div>
 
-              <FieldGroup className="min-h-0 flex-1 gap-4 overflow-hidden p-4">
-                <section className="flex max-h-[calc(100%-6rem)] shrink-0 flex-col overflow-hidden rounded-lg border bg-card lg:max-h-[calc(100%-9rem)]">
+              <FieldGroup className="min-h-0 flex-1 gap-4 overflow-hidden p-4 max-lg:flex-none max-lg:overflow-visible">
+                <section className="flex max-h-[calc(100%-6rem)] shrink-0 flex-col overflow-hidden rounded-lg border bg-card max-lg:max-h-none lg:max-h-[calc(100%-9rem)]">
                   <Button
                     aria-expanded={isCustomInputOpen}
                     className="h-auto w-full justify-between rounded-none px-3 py-3 text-left hover:bg-muted/50 aria-expanded:bg-muted/50"
@@ -1229,7 +1243,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                   </Button>
 
                   <DynamicHeight
-                    contentClassName="overflow-y-auto overscroll-contain"
+                    contentClassName="overflow-y-auto overscroll-contain max-lg:overflow-visible"
                     open={isCustomInputOpen}>
                     <div className="grid gap-3 border-t bg-card p-3">
                       <Field>
@@ -1253,7 +1267,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                           value={input.description}
                         />
                       </Field>
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
                         <Field>
                           <FieldLabel htmlFor="brandName">
                             {copy.brandName}
@@ -1314,7 +1328,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                           />
                         </Field>
                       ) : null}
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-2 gap-3 max-sm:grid-cols-1">
                         <Field>
                           <FieldLabel htmlFor="author">{copy.author}</FieldLabel>
                           <Textarea
@@ -1338,14 +1352,14 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                   </DynamicHeight>
                 </section>
 
-                <section className="flex min-h-20 flex-1 flex-col gap-2 overflow-hidden lg:min-h-36">
+                <section className="flex min-h-20 flex-1 flex-col gap-2 overflow-hidden max-lg:min-h-fit max-lg:flex-none max-lg:overflow-visible lg:min-h-36">
                   <div className="flex items-center justify-between gap-3">
                     <h4 className="text-xs font-medium">{copy.contentPresets}</h4>
                     <span className="font-mono text-[0.625rem] text-muted-foreground">
                       {inputPresets.length} {copy.exampleSuffix}
                     </span>
                   </div>
-                  <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border overscroll-contain">
+                  <div className="min-h-0 flex-1 overflow-y-auto rounded-lg border overscroll-contain max-lg:overflow-visible">
                     {inputPresets.map(preset => {
                       const isSelected = selectedPresetId === preset.id
                       const localizedPreset = presetCopy(locale, preset)
@@ -1387,7 +1401,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
               ) : null}
             </form>
 
-            <section className="order-1 flex min-h-0 min-w-0 flex-col overflow-hidden bg-card">
+            <section className="order-1 flex min-h-0 min-w-0 flex-col overflow-hidden bg-card max-lg:min-h-fit max-lg:overflow-visible">
               <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b px-4">
                 <div
                   className={`flex min-w-0 items-center gap-1 text-xs ${
@@ -1400,7 +1414,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                   <h3 className="mr-1 shrink-0 text-sm font-medium text-foreground">
                     {copy.preview}
                   </h3>
-                  <span className="min-w-0 truncate font-mono">
+                  <span className="min-w-0 truncate font-mono max-sm:hidden">
                     {selectedTemplate?.id ?? input.template}
                   </span>
                   <Button
@@ -1454,39 +1468,47 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                     inputDefaults={inputDefaults}
                     locale={locale}
                   />
-                  <Button
-                    aria-busy={exportingFormat === 'svg'}
-                    disabled={
-                      !previewUrl || isBusy || isPreviewStale || customLogoUrlMissing
-                    }
-                    onClick={() => void exportImage('svg')}
-                    type="button"
-                    variant="outline">
-                    {exportingFormat === 'svg' ? (
-                      <SpinnerIcon className={`${iconClassName} animate-spin`} />
-                    ) : (
-                      <DownloadIcon className={iconClassName} />
-                    )}
-                    {exportingFormat === 'svg' ? copy.exporting : copy.downloadSvg}
-                  </Button>
-                  <Button
-                    aria-busy={exportingFormat === 'png'}
-                    disabled={
-                      !previewUrl || isBusy || isPreviewStale || customLogoUrlMissing
-                    }
-                    onClick={() => void exportImage('png')}
-                    type="button"
-                    variant="outline">
-                    {exportingFormat === 'png' ? (
-                      <SpinnerIcon className={`${iconClassName} animate-spin`} />
-                    ) : (
-                      <DownloadIcon className={iconClassName} />
-                    )}
-                    {exportingFormat === 'png' ? copy.exporting : copy.downloadPng}
-                  </Button>
+                  <div className="hidden items-center gap-1.5 lg:flex">
+                    <Button
+                      aria-busy={exportingFormat === 'svg'}
+                      disabled={
+                        !previewUrl ||
+                        isBusy ||
+                        isPreviewStale ||
+                        customLogoUrlMissing
+                      }
+                      onClick={() => void exportImage('svg')}
+                      type="button"
+                      variant="outline">
+                      {exportingFormat === 'svg' ? (
+                        <SpinnerIcon className={`${iconClassName} animate-spin`} />
+                      ) : (
+                        <DownloadIcon className={iconClassName} />
+                      )}
+                      {exportingFormat === 'svg' ? copy.exporting : copy.downloadSvg}
+                    </Button>
+                    <Button
+                      aria-busy={exportingFormat === 'png'}
+                      disabled={
+                        !previewUrl ||
+                        isBusy ||
+                        isPreviewStale ||
+                        customLogoUrlMissing
+                      }
+                      onClick={() => void exportImage('png')}
+                      type="button"
+                      variant="outline">
+                      {exportingFormat === 'png' ? (
+                        <SpinnerIcon className={`${iconClassName} animate-spin`} />
+                      ) : (
+                        <DownloadIcon className={iconClassName} />
+                      )}
+                      {exportingFormat === 'png' ? copy.exporting : copy.downloadPng}
+                    </Button>
+                  </div>
                 </div>
               </div>
-              <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-muted/30 p-3 sm:p-6">
+              <div className="relative flex min-h-0 flex-1 items-center justify-center overflow-hidden bg-muted/30 p-3 max-lg:flex-none max-lg:flex-col max-lg:gap-3 max-lg:overflow-visible sm:p-6">
                 <RenderBehaviorControls
                   appliedBehavior={renderBehavior}
                   behavior={draftRenderBehavior}
@@ -1521,6 +1543,56 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
             </section>
           </div>
         </div>
+
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-[0_-8px_24px_color-mix(in_oklch,var(--foreground)_8%,transparent)] backdrop-blur-sm lg:hidden">
+          <div className="mx-auto grid w-full max-w-lg grid-cols-[minmax(0,1fr)_2.75rem_2.75rem] gap-2">
+            <RenderButton
+              className="h-11 w-full"
+              disabled={!canRender || isBusy}
+              form="placard-render-form"
+              isLoading={isRendering}
+              label={isPreviewStale ? copy.updatePreview : copy.renderAgain}
+              loadingLabel={copy.rendering}
+              type="submit"
+            />
+            <Button
+              aria-busy={exportingFormat === 'svg'}
+              aria-label={copy.downloadSvg}
+              className="size-11 font-mono text-[0.625rem]"
+              disabled={
+                !previewUrl || isBusy || isPreviewStale || customLogoUrlMissing
+              }
+              onClick={() => void exportImage('svg')}
+              size="icon-lg"
+              title={copy.downloadSvg}
+              type="button"
+              variant="outline">
+              {exportingFormat === 'svg' ? (
+                <SpinnerIcon className="size-4 animate-spin" />
+              ) : (
+                'SVG'
+              )}
+            </Button>
+            <Button
+              aria-busy={exportingFormat === 'png'}
+              aria-label={copy.downloadPng}
+              className="size-11 font-mono text-[0.625rem]"
+              disabled={
+                !previewUrl || isBusy || isPreviewStale || customLogoUrlMissing
+              }
+              onClick={() => void exportImage('png')}
+              size="icon-lg"
+              title={copy.downloadPng}
+              type="button"
+              variant="outline">
+              {exportingFormat === 'png' ? (
+                <SpinnerIcon className="size-4 animate-spin" />
+              ) : (
+                'PNG'
+              )}
+            </Button>
+          </div>
+        </div>
       </section>
 
       <Dialog onOpenChange={setIsTemplateDialogOpen} open={isTemplateDialogOpen}>
@@ -1533,7 +1605,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
             </DialogDescription>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-4 md:p-8">
-            <div className="mx-auto grid w-full max-w-6xl gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+            <div className="mx-auto grid w-full max-w-6xl gap-4 max-sm:grid-cols-2 max-sm:gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
               {templates.map(template => {
                 const isSelected = input.template === template.id
                 const preview = templatePreviewUrl(template)
@@ -1556,12 +1628,12 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                       loading="lazy"
                       src={preview}
                     />
-                    <span className="flex w-full items-start justify-between gap-3 p-4">
+                    <span className="flex w-full items-start justify-between gap-3 p-4 max-sm:gap-2 max-sm:p-3">
                       <span className="min-w-0">
                         <span className="block text-sm font-medium">
                           {template.name}
                         </span>
-                        <span className="mt-1 block text-xs/relaxed font-normal text-muted-foreground">
+                        <span className="mt-1 block text-xs/relaxed font-normal text-muted-foreground max-sm:hidden">
                           {template.description}
                         </span>
                       </span>

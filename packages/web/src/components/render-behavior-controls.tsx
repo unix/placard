@@ -135,7 +135,7 @@ const PresetControl = <Value extends number | string>({
   presetLabel,
   value,
 }: PresetControlProps<Value>) => (
-  <div className="grid grid-cols-[minmax(0,10.5rem)_minmax(6rem,1fr)] items-start gap-1.5">
+  <div className="grid grid-cols-[minmax(0,10.5rem)_minmax(6rem,1fr)] items-start gap-1.5 max-sm:grid-cols-1">
     <div
       aria-label={`${label} ${presetLabel}`}
       className="flex min-w-0 flex-wrap gap-1"
@@ -278,7 +278,7 @@ const RenderBehaviorControls = ({
 
   return (
     <Collapsible
-      className={`absolute top-3 left-3 z-20 flex max-h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)] flex-col overflow-hidden rounded-lg border bg-background/95 backdrop-blur-sm transition-[max-width,box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none ${isOpen ? 'max-w-2xl shadow-xs' : 'max-w-52 shadow-2xs'}`}
+      className={`absolute top-3 left-3 z-20 flex max-h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)] flex-col overflow-hidden rounded-lg border bg-background/95 backdrop-blur-sm transition-[max-width,box-shadow] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none max-lg:relative max-lg:top-auto max-lg:left-auto max-lg:max-h-none max-lg:w-full max-lg:max-w-none ${isOpen ? 'max-w-2xl shadow-xs' : 'max-w-52 shadow-2xs'}`}
       onOpenChange={setIsOpen}
       open={isOpen}>
       <CollapsibleTrigger
@@ -304,7 +304,7 @@ const RenderBehaviorControls = ({
         className="grid min-h-0 grid-rows-[1fr] transition-[grid-template-rows,opacity,transform] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none data-ending-style:-translate-y-1 data-ending-style:grid-rows-[0fr] data-ending-style:opacity-0 data-starting-style:-translate-y-1 data-starting-style:grid-rows-[0fr] data-starting-style:opacity-0"
         style={{ height: 'auto' }}>
         <div className="min-h-0 overflow-hidden">
-          <div className="h-full overflow-y-auto border-t bg-background p-3 overscroll-contain">
+          <div className="h-full overflow-y-auto border-t bg-background p-3 overscroll-contain max-lg:h-auto max-lg:overflow-visible">
             <p className="mb-3 text-xs text-muted-foreground">{copy.description}</p>
             <div className="grid grid-cols-1 items-start gap-3 sm:grid-cols-2">
               <Field className="gap-1.5">
