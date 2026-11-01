@@ -672,6 +672,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
   const isPreviewStale =
     previewUrl !== null &&
     renderedInputSignature !== inputSignature(input, renderBehavior)
+  const isPreviewStaleVisible = isPreviewStale && !isPreviewLoading
   const isSelectedTemplateFavorite = favoriteTemplateIds.includes(input.template)
 
   const captureTemplatePositions = useCallback((templateId: string) => {
@@ -1392,7 +1393,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                   className={`flex min-w-0 items-center gap-1 text-xs ${
                     previewError
                       ? 'text-muted-foreground'
-                      : isPreviewStale
+                      : isPreviewStaleVisible
                         ? 'text-amber-700 dark:text-amber-400'
                         : 'text-muted-foreground'
                   }`}>
@@ -1434,7 +1435,15 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                   <span
                     aria-live="polite"
                     className={`truncate ${previewError ? 'text-destructive' : ''}`}>
-                    {previewError ?? (isPreviewStale ? copy.previewStale : null)}
+                    {previewError ??
+                      (isPreviewLoading ? (
+                        <>
+                          <SpinnerIcon className="size-3 shrink-0 animate-spin" />
+                          <span className="sr-only">{copy.rendering}</span>
+                        </>
+                      ) : isPreviewStaleVisible ? (
+                        copy.previewStale
+                      ) : null)}
                   </span>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
