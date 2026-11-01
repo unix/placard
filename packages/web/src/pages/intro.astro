@@ -154,7 +154,11 @@ const environmentVariables = [
     'Comma-separated trusted proxy IPs, CIDRs, or proxy-addr names such as loopback.',
   ],
   ['HOST', '0.0.0.0', 'Address on which the API listens.'],
-  ['PORT', '3003', 'Port on which the API listens inside the container.'],
+  [
+    'PORT',
+    '3003',
+    'Port on which the API listens. Set a different valid TCP port at runtime when needed.',
+  ],
   ['LOG_LEVEL', 'info', 'API log level, such as debug, info, warn, or error.'],
 ]
 
@@ -345,7 +349,9 @@ docker run --detach \
       </h3>
       <p class="mt-3 text-sm leading-7 text-muted-foreground">
         Pass runtime settings with Docker --env or --env-file. Empty or invalid
-        positive-integer values use the documented defaults.
+        positive-integer values use the documented defaults. The API listens on
+        port 3003 by default; set PORT and publish the same container port to
+        override it without rebuilding the image.
       </p>
       <div class={tableContainerClassName}>
         <table class={tableClassName}>
@@ -373,6 +379,13 @@ docker run --detach \
           </tbody>
         </table>
       </div>
+
+      <pre
+        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
+  --name nore-og \
+  --env PORT=13003 \
+  --publish 13003:13003 \
+  nore-og</code></pre>
 
       <h3 class="mt-10 text-base font-medium">Configuration examples</h3>
       <p class="mt-3 text-sm leading-7 text-muted-foreground">

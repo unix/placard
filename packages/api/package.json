@@ -13,7 +13,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "dev": "OG_WEB_ENABLED=false tsx watch src/server.ts",
-    "start": "node dist/src/server.js",
+    "start": "node --env-file-if-exists=.env dist/src/server.js",
     "test": "tsx --test test/**/*.test.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },

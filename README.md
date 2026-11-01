@@ -40,6 +40,22 @@ Use an exact version in production so deployments do not change unexpectedly:
 docker run --rm -p 3003:3003 ghcr.io/norehq/og:0.1.0
 ```
 
+## Runtime port
+
+The API listens on `0.0.0.0:3003` by default. Set `HOST` or `PORT` at runtime to
+override either value without rebuilding the application:
+
+```sh
+HOST=127.0.0.1 PORT=13003 pnpm --filter @norehq/open-graph-api start
+```
+
+The API package's `start` command loads `packages/api/.env` when that file exists.
+For Docker, pass the same variable and publish the matching container port:
+
+```sh
+docker run --rm -e PORT=13003 -p 13003:13003 ghcr.io/norehq/og:0.1.0
+```
+
 ## License
 
 [MIT](LICENSE)

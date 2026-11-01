@@ -7,22 +7,18 @@ const integerFromEnv = (
   value: string | undefined,
   fallback: number,
   minimum: number,
+  maximum = Number.MAX_SAFE_INTEGER,
 ) => {
   const trimmed = value?.trim()
   if (!trimmed) return fallback
   const number = Number(trimmed)
-  if (!Number.isSafeInteger(number) || number < minimum) return fallback
+  if (!Number.isSafeInteger(number) || number < minimum || number > maximum)
+    return fallback
   return number
 }
 
-export const portFromEnv = (value: string | undefined) => {
-  if (value == null) return defaultPort
-  const trimmed = value.trim()
-  if (trimmed.length === 0) return defaultPort
-  const port = Number(trimmed)
-  if (!Number.isInteger(port) || port <= 0) return defaultPort
-  return port
-}
+export const portFromEnv = (value: string | undefined) =>
+  integerFromEnv(value, defaultPort, 1, 65_535)
 
 export const tokenFromEnv = (value: string | undefined) => {
   const token = value?.trim()
