@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Placard · Inverse Mark Preview</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          Inter,
+          Geist,
+          ui-sans-serif,
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        color: #171715;
+        background: #e9e9e5;
+        font-synthesis: none;
+        --ink: #171715;
+        --paper: #f8f8f5;
+        --muted: #73736d;
+        --line: #d0d0ca;
+        --custom-background: #09090b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-width: 320px;
+        margin: 0;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      .page {
+        width: min(1440px, 100%);
+        margin: 0 auto;
+        padding: 28px 28px 72px;
+      }
+
+      .mono {
+        font-family:
+          ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 11px;
+        font-weight: 650;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 17px;
+        border-bottom: 1px solid #c6c6c0;
+      }
+
+      .topbar p {
+        margin: 0;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+        gap: 76px;
+        align-items: end;
+        padding: 80px 0 58px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(54px, 8vw, 116px);
+        font-weight: 560;
+        letter-spacing: -0.075em;
+        line-height: 0.84;
+      }
+
+      h1 span {
+        display: block;
+        color: #a1a19b;
+      }
+
+      .brief {
+        margin: 0;
+        color: #565651;
+        font-size: 14px;
+        line-height: 1.75;
+      }
+
+      .brief strong {
+        color: var(--ink);
+        font-weight: 650;
+      }
+
+      .controls {
+        display: flex;
+        margin-bottom: 18px;
+        padding: 12px 14px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: rgb(248 248 245 / 68%);
+      }
+
+      .control-group {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+
+      .color-input {
+        width: 32px;
+        height: 32px;
+        padding: 2px;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        background: white;
+        cursor: pointer;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .preview-card {
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: var(--paper);
+      }
+
+      .stage {
+        position: relative;
+        display: grid;
+        min-height: 360px;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      .stage::after {
+        position: absolute;
+        inset: 0;
+        border: 1px solid rgb(255 255 255 / 8%);
+        content: '';
+        pointer-events: none;
+      }
+
+      .stage-black {
+        background: #000;
+      }
+
+      .stage-ink {
+        background: #09090b;
+      }
+
+      .stage-gradient {
+        background:
+          radial-gradient(circle at 20% 15%, #3f3f46 0, transparent 42%),
+          linear-gradient(145deg, #18181b, #030303 72%);
+      }
+
+      .stage-custom {
+        background: var(--custom-background);
+      }
+
+      .mark {
+        position: relative;
+        z-index: 1;
+        width: 176px;
+        height: 176px;
+        object-fit: contain;
+        filter: drop-shadow(0 16px 22px rgb(0 0 0 / 18%));
+      }
+
+      .card-footer {
+        display: flex;
+        padding: 17px 18px;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 16px;
+        border-top: 1px solid var(--line);
+      }
+
+      h2 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 650;
+        letter-spacing: -0.03em;
+      }
+
+      .card-footer p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .scale-test {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) repeat(4, auto);
+        gap: 10px;
+        margin-top: 16px;
+        padding: 16px 18px;
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        color: white;
+        background: #09090b;
+      }
+
+      .scale-label {
+        color: #a1a1aa;
+      }
+
+      .scale-item {
+        display: grid;
+        width: 74px;
+        height: 74px;
+        place-items: center;
+        border: 1px solid rgb(255 255 255 / 9%);
+        border-radius: 9px;
+      }
+
+      .scale-item svg {
+        width: var(--size);
+        height: var(--size);
+      }
+
+      .sprite {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+      }
+
+      .footer {
+        display: flex;
+        margin-top: 38px;
+        padding-top: 17px;
+        justify-content: space-between;
+        gap: 24px;
+        border-top: 1px solid #c6c6c0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.6;
+      }
+
+      .footer p {
+        margin: 0;
+      }
+
+      @media (max-width: 840px) {
+        .hero {
+          grid-template-columns: 1fr;
+          gap: 28px;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .scale-test {
+          grid-template-columns: repeat(4, 1fr);
+        }
+
+        .scale-label {
+          grid-column: 1 / -1;
+        }
+      }
+
+      @media (max-width: 560px) {
+        .page {
+          padding: 20px 14px 48px;
+        }
+
+        .topbar .muted {
+          display: none;
+        }
+
+        .hero {
+          padding: 56px 0 42px;
+        }
+
+        h1 {
+          font-size: clamp(48px, 16vw, 76px);
+        }
+
+        .controls {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .stage {
+          min-height: 280px;
+        }
+
+        .scale-item {
+          width: 100%;
+        }
+
+        .footer {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg class="sprite" aria-hidden="true">
+      <defs>
+        <symbol id="inverse-mark" viewBox="0 0 64 64">
+          <g transform="translate(-8 10)" fill="#ffffff">
+            <rect
+              x="27"
+              y="8"
+              width="26"
+              height="31"
+              rx="5"
+              opacity="0.3"
+              transform="rotate(-14 40 39)" />
+            <rect
+              x="27"
+              y="8"
+              width="26"
+              height="31"
+              rx="5"
+              opacity="0.6"
+              transform="rotate(14 40 39)" />
+            <rect x="27" y="8" width="26" height="31" rx="5" opacity="0.88" />
+          </g>
+        </symbol>
+      </defs>
+    </svg>
+
+    <main class="page">
+      <div class="topbar">
+        <p class="mono">Placard / Inverse mark preview</p>
+        <p class="mono muted">Registered as Placard Inverse</p>
+      </div>
+
+      <header class="hero">
+        <h1>White mark.<span>Dark surfaces.</span></h1>
+        <p class="brief">
+          与当前 mark 使用完全相同的几何和<strong>30% / 60% / 88%</strong
+          >层级，仅将深色填充反转为白色。透明背景，不包含底板。
+        </p>
+      </header>
+
+      <div class="controls">
+        <div class="control-group">
+          <span class="mono muted">Inline vector preview</span>
+          <span class="mono">30 / 60 / 88</span>
+        </div>
+        <label class="control-group">
+          <span class="mono muted">Custom background</span>
+          <input class="color-input" id="background" type="color" value="#09090b" />
+          <span class="mono" id="background-value">#09090B</span>
+        </label>
+      </div>
+
+      <section class="grid" aria-label="反色 mark 背景预览">
+        <article class="preview-card">
+          <div class="stage stage-black">
+            <svg
+              class="mark"
+              aria-label="Placard 反色 mark，纯黑背景"
+              role="img"
+              viewBox="0 0 64 64">
+              <use href="#inverse-mark" />
+            </svg>
+          </div>
+          <div class="card-footer">
+            <h2>Pure Black</h2>
+            <p class="mono">#000000</p>
+          </div>
+        </article>
+
+        <article class="preview-card">
+          <div class="stage stage-ink">
+            <svg
+              class="mark"
+              aria-label="Placard 反色 mark，墨黑背景"
+              role="img"
+              viewBox="0 0 64 64">
+              <use href="#inverse-mark" />
+            </svg>
+          </div>
+          <div class="card-footer">
+            <h2>Placard Ink</h2>
+            <p class="mono">#09090B</p>
+          </div>
+        </article>
+
+        <article class="preview-card">
+          <div class="stage stage-gradient">
+            <svg
+              class="mark"
+              aria-label="Placard 反色 mark，渐变背景"
+              role="img"
+              viewBox="0 0 64 64">
+              <use href="#inverse-mark" />
+            </svg>
+          </div>
+          <div class="card-footer">
+            <h2>Dark Gradient</h2>
+            <p class="mono">Mixed surface</p>
+          </div>
+        </article>
+
+        <article class="preview-card">
+          <div class="stage stage-custom">
+            <svg
+              class="mark"
+              aria-label="Placard 反色 mark，自定义背景"
+              role="img"
+              viewBox="0 0 64 64">
+              <use href="#inverse-mark" />
+            </svg>
+          </div>
+          <div class="card-footer">
+            <h2>Custom</h2>
+            <p class="mono">Use picker above</p>
+          </div>
+        </article>
+      </section>
+
+      <section class="scale-test" aria-label="小尺寸测试">
+        <span class="mono scale-label">Scale test on #09090B</span>
+        <span class="scale-item">
+          <svg style="--size: 24px" aria-label="24px" role="img" viewBox="0 0 64 64">
+            <use href="#inverse-mark" />
+          </svg>
+        </span>
+        <span class="scale-item">
+          <svg style="--size: 32px" aria-label="32px" role="img" viewBox="0 0 64 64">
+            <use href="#inverse-mark" />
+          </svg>
+        </span>
+        <span class="scale-item">
+          <svg style="--size: 48px" aria-label="48px" role="img" viewBox="0 0 64 64">
+            <use href="#inverse-mark" />
+          </svg>
+        </span>
+        <span class="scale-item">
+          <svg style="--size: 64px" aria-label="64px" role="img" viewBox="0 0 64 64">
+            <use href="#inverse-mark" />
+          </svg>
+        </span>
+      </section>
+
+      <footer class="footer">
+        <p>反色素材已作为 Placard Inverse 注册到服务端。</p>
+        <p>SVG 512×512 · PNG 400×400 · 透明背景</p>
+      </footer>
+    </main>
+
+    <script>
+      const backgroundInput = document.querySelector('#background')
+      const backgroundValue = document.querySelector('#background-value')
+      backgroundInput.addEventListener('input', () => {
+        document.documentElement.style.setProperty(
+          '--custom-background',
+          backgroundInput.value,
+        )
+        backgroundValue.textContent = backgroundInput.value.toUpperCase()
+      })
+    </script>
+  </body>
+</html>
