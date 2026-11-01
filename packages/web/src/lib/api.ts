@@ -36,13 +36,14 @@ export interface RenderBehaviorCatalog {
 }
 
 export interface TemplateMeta {
+  readonly defaultLogoId: string
   readonly id: string
   readonly name: string
   readonly description: string
   readonly fields: readonly Exclude<keyof RenderInput, 'template'>[]
 }
 
-export type TemplateSummary = Omit<TemplateMeta, 'fields'>
+export type TemplateSummary = Omit<TemplateMeta, 'defaultLogoId' | 'fields'>
 
 export interface LogoMeta {
   readonly id: string
@@ -70,6 +71,7 @@ export interface TemplateCatalog {
     readonly customId: string
     readonly defaultId: string
     readonly items: readonly LogoMeta[]
+    readonly noneId: string
   }
   readonly renderBehavior: RenderBehaviorCatalog
   readonly templates: readonly TemplateMeta[]

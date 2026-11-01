@@ -1,12 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react'
 
 import { customLogoId, logoForId } from '../../assets/logo/index.js'
-import {
-  defaultLogoId,
-  defaultTitle,
-  imageHeight,
-  imageWidth,
-} from '../constants.js'
+import { defaultTitle, imageHeight, imageWidth } from '../constants.js'
 import type { RenderInput } from '../og/input.js'
 import { truncateUnbreakableTextRuns } from '../og/text-length.js'
 import type { TemplateField } from './types.js'
@@ -84,7 +79,6 @@ export const brandText = (input: RenderInput) => {
 
 export const logoSrc = (input: RenderInput) => {
   if (input.logoId === customLogoId) return optionalText(input.logoUrl)
-  if (input.logoId === defaultLogoId) return null
   return logoForId(input.logoId)?.src ?? null
 }
 

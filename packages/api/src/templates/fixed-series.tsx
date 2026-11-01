@@ -18,7 +18,7 @@ interface PatternDefinition {
   readonly opacity: number
 }
 
-interface FrameDefinition {
+export interface FrameDefinition {
   readonly backgroundColor: string
   readonly backgroundImage?: string
   readonly foreground: string
@@ -57,7 +57,7 @@ const patternSvg = (pattern: PatternDefinition) => {
 const patternDataUrl = (pattern: PatternDefinition) =>
   `data:image/svg+xml;base64,${Buffer.from(patternSvg(pattern)).toString('base64')}`
 
-const FixedFrame = ({
+export const FixedFrame = ({
   children,
   frame,
   random,
@@ -156,7 +156,7 @@ const paperFrame = {
   secondary: '#57534e',
 } as const satisfies FrameDefinition
 
-const inkFrame = {
+export const inkFrame = {
   backgroundColor: '#09090b',
   backgroundImage: 'linear-gradient(145deg, #09090b 0%, #18181b 54%, #09090b 100%)',
   foreground: '#fafafa',
@@ -180,7 +180,7 @@ const auroraFrame = {
   secondary: '#ccfbf1',
 } as const satisfies FrameDefinition
 
-const prismFrame = {
+export const prismFrame = {
   backgroundColor: '#fc7efc',
   backgroundImage: 'linear-gradient(135deg, #01befc 0%, #fc7efc 52%, #fbd847 100%)',
   foreground: '#111827',
@@ -196,7 +196,7 @@ const sunsetFrame = {
   secondary: '#ffedd5',
 } as const satisfies FrameDefinition
 
-const mistFrame = {
+export const mistFrame = {
   backgroundColor: '#f8fafc',
   backgroundImage: 'linear-gradient(135deg, #f8fafc 0%, #e9d5ff 48%, #bfdbfe 100%)',
   foreground: '#1e1b4b',
@@ -204,7 +204,7 @@ const mistFrame = {
   secondary: '#475569',
 } as const satisfies FrameDefinition
 
-const monoFrame = {
+export const monoFrame = {
   backgroundColor: '#18181b',
   backgroundImage: 'linear-gradient(140deg, #09090b 0%, #3f3f46 48%, #18181b 100%)',
   foreground: '#fafafa',
@@ -221,7 +221,7 @@ const gridLightFrame = {
   secondary: '#475569',
 } as const satisfies FrameDefinition
 
-const gridDarkFrame = {
+export const gridDarkFrame = {
   backgroundColor: '#202124',
   backgroundImage:
     'linear-gradient(90deg, rgba(32, 33, 36, 0.98) 0%, rgba(32, 33, 36, 0.88) 66%, rgba(32, 33, 36, 0.46) 100%)',
@@ -244,13 +244,6 @@ export const fixedTemplates = [
     description: 'A restrained paper brief with a broad title and summary.',
     frame: paperFrame,
     style: 'float-summary',
-  }),
-  defineFixedTemplate({
-    id: 'paper-masthead',
-    name: 'Paper Masthead',
-    description: 'A clean horizontal identity lockup on a warm paper surface.',
-    frame: paperFrame,
-    style: 'site-logo',
   }),
   defineFixedTemplate({
     id: 'ink-column',
@@ -315,13 +308,6 @@ export const fixedTemplates = [
     style: 'centered',
   }),
   defineFixedTemplate({
-    id: 'aurora-mark',
-    name: 'Aurora Mark',
-    description: 'A large identity presentation over a luminous teal atmosphere.',
-    frame: auroraFrame,
-    style: 'logo-hero',
-  }),
-  defineFixedTemplate({
     id: 'prism-focus',
     name: 'Prism Focus',
     description: 'A centered dark headline on a cyan, magenta, and gold field.',
@@ -334,13 +320,6 @@ export const fixedTemplates = [
     description: 'A bold prismatic brief with a wide headline and supporting copy.',
     frame: prismFrame,
     style: 'float-summary',
-  }),
-  defineFixedTemplate({
-    id: 'prism-masthead',
-    name: 'Prism Masthead',
-    description: 'A vivid identity lockup for compact brand announcements.',
-    frame: prismFrame,
-    style: 'site-logo',
   }),
   defineFixedTemplate({
     id: 'sunset-column',
@@ -378,13 +357,6 @@ export const fixedTemplates = [
     style: 'float-summary',
   }),
   defineFixedTemplate({
-    id: 'mist-mark',
-    name: 'Mist Mark',
-    description: 'A calm identity presentation on a pearl and sky gradient.',
-    frame: mistFrame,
-    style: 'logo-hero',
-  }),
-  defineFixedTemplate({
     id: 'mono-focus',
     name: 'Mono Focus',
     description: 'A centered headline on a layered graphite monochrome surface.',
@@ -397,13 +369,6 @@ export const fixedTemplates = [
     description: 'A monochrome folio with the title above and identity below.',
     frame: monoFrame,
     style: 'float-reverse',
-  }),
-  defineFixedTemplate({
-    id: 'mono-masthead',
-    name: 'Mono Masthead',
-    description: 'A horizontal identity lockup on graphite and silver.',
-    frame: monoFrame,
-    style: 'site-logo',
   }),
   defineFixedTemplate({
     id: 'grid-light-column',

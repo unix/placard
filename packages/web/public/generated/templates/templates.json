@@ -1,53 +1,203 @@
 [
   {
     "description": "Neutral single-panel OG card with optional metadata.",
-    "id": "nore-minimal",
-    "name": "Nore Minimal"
+    "id": "minimal",
+    "name": "Minimal"
   },
   {
     "description": "Minimal logo-focused OG card with a bottom title badge.",
-    "id": "nore-logo-only",
-    "name": "Nore Logo Only"
+    "id": "logo-only",
+    "name": "Logo Only"
   },
   {
     "description": "Dark logo-focused OG card with a centered bottom title badge.",
-    "id": "nore-logo-only-dark",
-    "name": "Nore Logo Only Dark"
-  },
-  {
-    "description": "Minimal black gradient OG card with a bold centered blog name.",
-    "id": "nore-report",
-    "name": "Nore Report"
+    "id": "logo-only-dark",
+    "name": "Logo Only Dark"
   },
   {
     "description": "Dark single-panel OG card with a bold title and slash-separated metadata.",
-    "id": "nore-night",
-    "name": "Nore Night"
+    "id": "night",
+    "name": "Night"
   },
   {
     "description": "Warm editorial OG card with a centered logo and title.",
-    "id": "nore-spotlight",
-    "name": "Nore Spotlight"
+    "id": "spotlight",
+    "name": "Spotlight"
   },
   {
     "description": "Layered neutral OG card with centered title and metadata.",
-    "id": "nore-stack",
-    "name": "Nore Stack"
-  },
-  {
-    "description": "Black OG card with a large centered logo and site name.",
-    "id": "nore-signal",
-    "name": "Nore Signal"
+    "id": "stack",
+    "name": "Stack"
   },
   {
     "description": "Light blueprint OG card with grid background and centered hierarchy.",
-    "id": "nore-blueprint",
-    "name": "Nore Blueprint"
+    "id": "blueprint",
+    "name": "Blueprint"
   },
   {
     "description": "High-contrast white card with stacked black title and author blocks.",
-    "id": "nore-central",
-    "name": "Nore Central"
+    "id": "central",
+    "name": "Central"
+  },
+  {
+    "description": "A bold centered brand name on a clean white background.",
+    "id": "logo-text-white",
+    "name": "Logo Text White"
+  },
+  {
+    "description": "A bold centered brand name on a near-black background.",
+    "id": "logo-text-dark",
+    "name": "Logo Text Dark"
+  },
+  {
+    "description": "A bold centered brand name on a seeded dark color gradient.",
+    "id": "logo-text-gradient",
+    "name": "Logo Text Gradient"
+  },
+  {
+    "description": "A bold centered brand name on a light seeded square grid.",
+    "id": "logo-text-grid",
+    "name": "Logo Text Grid"
+  },
+  {
+    "description": "A bold centered brand name on a softly glowing near-black ink field.",
+    "id": "logo-text-ink",
+    "name": "Logo Text Ink"
+  },
+  {
+    "description": "A bold centered brand name on a vivid cyan, magenta, and gold field.",
+    "id": "logo-text-prism",
+    "name": "Logo Text Prism"
+  },
+  {
+    "description": "A bold centered brand name on an airy pearl, lavender, and sky gradient.",
+    "id": "logo-text-mist",
+    "name": "Logo Text Mist"
+  },
+  {
+    "description": "A bold centered brand name on a layered graphite monochrome surface.",
+    "id": "logo-text-mono",
+    "name": "Logo Text Mono"
+  },
+  {
+    "description": "A large centered logo with the brand name below on a clean white background.",
+    "id": "signal-white",
+    "name": "Signal White"
+  },
+  {
+    "description": "A large centered logo with the brand name below on a near-black background.",
+    "id": "signal-dark",
+    "name": "Signal Dark"
+  },
+  {
+    "description": "A large centered logo with the brand name below on a seeded dark color gradient.",
+    "id": "signal-gradient",
+    "name": "Signal Gradient"
+  },
+  {
+    "description": "A large centered logo with the brand name below on a light seeded square grid.",
+    "id": "signal-grid",
+    "name": "Signal Grid"
+  },
+  {
+    "description": "A large centered logo with the brand name below on a softly glowing near-black ink field.",
+    "id": "signal-ink",
+    "name": "Signal Ink"
+  },
+  {
+    "description": "A large centered logo with the brand name below on a vivid cyan, magenta, and gold field.",
+    "id": "signal-prism",
+    "name": "Signal Prism"
+  },
+  {
+    "description": "A large centered logo with the brand name below on an airy pearl, lavender, and sky gradient.",
+    "id": "signal-mist",
+    "name": "Signal Mist"
+  },
+  {
+    "description": "A large centered logo with the brand name below on a layered graphite monochrome surface.",
+    "id": "signal-mono",
+    "name": "Signal Mono"
+  },
+  {
+    "description": "A centered horizontal logo and brand lockup on a clean white background.",
+    "id": "logo-center-white",
+    "name": "Logo Center White"
+  },
+  {
+    "description": "A centered horizontal logo and brand lockup on a near-black background.",
+    "id": "logo-center-dark",
+    "name": "Logo Center Dark"
+  },
+  {
+    "description": "A centered horizontal logo and brand lockup on a seeded dark color gradient.",
+    "id": "logo-center-gradient",
+    "name": "Logo Center Gradient"
+  },
+  {
+    "description": "A centered horizontal logo and brand lockup on a light seeded square grid.",
+    "id": "logo-center-grid",
+    "name": "Logo Center Grid"
+  },
+  {
+    "description": "A centered horizontal logo and brand lockup on a softly glowing near-black ink field.",
+    "id": "logo-center-ink",
+    "name": "Logo Center Ink"
+  },
+  {
+    "description": "A centered horizontal logo and brand lockup on a vivid cyan, magenta, and gold field.",
+    "id": "logo-center-prism",
+    "name": "Logo Center Prism"
+  },
+  {
+    "description": "A centered horizontal logo and brand lockup on an airy pearl, lavender, and sky gradient.",
+    "id": "logo-center-mist",
+    "name": "Logo Center Mist"
+  },
+  {
+    "description": "A centered horizontal logo and brand lockup on a layered graphite monochrome surface.",
+    "id": "logo-center-mono",
+    "name": "Logo Center Mono"
+  },
+  {
+    "description": "A large centered identity presentation on a clean white background.",
+    "id": "logo-large-white",
+    "name": "Logo Large White"
+  },
+  {
+    "description": "A large centered identity presentation on a near-black background.",
+    "id": "logo-large-dark",
+    "name": "Logo Large Dark"
+  },
+  {
+    "description": "A large centered identity presentation on a seeded dark color gradient.",
+    "id": "logo-large-gradient",
+    "name": "Logo Large Gradient"
+  },
+  {
+    "description": "A large centered identity presentation on a light seeded square grid.",
+    "id": "logo-large-grid",
+    "name": "Logo Large Grid"
+  },
+  {
+    "description": "A large centered identity presentation on a softly glowing near-black ink field.",
+    "id": "logo-large-ink",
+    "name": "Logo Large Ink"
+  },
+  {
+    "description": "A large centered identity presentation on a vivid cyan, magenta, and gold field.",
+    "id": "logo-large-prism",
+    "name": "Logo Large Prism"
+  },
+  {
+    "description": "A large centered identity presentation on an airy pearl, lavender, and sky gradient.",
+    "id": "logo-large-mist",
+    "name": "Logo Large Mist"
+  },
+  {
+    "description": "A large centered identity presentation on a layered graphite monochrome surface.",
+    "id": "logo-large-mono",
+    "name": "Logo Large Mono"
   },
   {
     "description": "Deep navy and violet gradient card with a centered title composition.",
@@ -115,11 +265,6 @@
     "name": "Paper Brief"
   },
   {
-    "description": "A clean horizontal identity lockup on a warm paper surface.",
-    "id": "paper-masthead",
-    "name": "Paper Masthead"
-  },
-  {
     "description": "A near-black framed title composition with restrained contrast.",
     "id": "ink-column",
     "name": "Ink Column"
@@ -160,11 +305,6 @@
     "name": "Aurora Focus"
   },
   {
-    "description": "A large identity presentation over a luminous teal atmosphere.",
-    "id": "aurora-mark",
-    "name": "Aurora Mark"
-  },
-  {
     "description": "A centered dark headline on a cyan, magenta, and gold field.",
     "id": "prism-focus",
     "name": "Prism Focus"
@@ -173,11 +313,6 @@
     "description": "A bold prismatic brief with a wide headline and supporting copy.",
     "id": "prism-brief",
     "name": "Prism Brief"
-  },
-  {
-    "description": "A vivid identity lockup for compact brand announcements.",
-    "id": "prism-masthead",
-    "name": "Prism Masthead"
   },
   {
     "description": "A framed title composition over plum, coral, and apricot color.",
@@ -205,11 +340,6 @@
     "name": "Mist Brief"
   },
   {
-    "description": "A calm identity presentation on a pearl and sky gradient.",
-    "id": "mist-mark",
-    "name": "Mist Mark"
-  },
-  {
     "description": "A centered headline on a layered graphite monochrome surface.",
     "id": "mono-focus",
     "name": "Mono Focus"
@@ -218,11 +348,6 @@
     "description": "A monochrome folio with the title above and identity below.",
     "id": "mono-folio",
     "name": "Mono Folio"
-  },
-  {
-    "description": "A horizontal identity lockup on graphite and silver.",
-    "id": "mono-masthead",
-    "name": "Mono Masthead"
   },
   {
     "description": "A simple framed title composition over a quiet technical grid.",

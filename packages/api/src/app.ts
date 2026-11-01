@@ -84,6 +84,8 @@ export const createApp = async (options: CreateAppOptions = {}) => {
     ...(trustProxy ? { trustProxy } : {}),
   })
 
+  app.setNotFoundHandler((_request, reply) => reply.status(404).send())
+
   await app.register(fastifyCors, {
     allowedHeaders: ['Accept', 'Authorization', 'Content-Type'],
     exposedHeaders: [

@@ -3,20 +3,54 @@ import test from 'node:test'
 import { fileURLToPath } from 'node:url'
 
 import { createApp } from '../src/app.js'
+import { defaultLogoId, inverseLogoId, noLogoId } from '../assets/logo/index.js'
 import { validateAccessConfig } from '../src/config.js'
+import { defaultTemplateId } from '../src/constants.js'
 import { defaultGlobalRenderBehavior } from '../src/og/behavior.js'
+import { renderInputFromUnknown } from '../src/og/input.js'
+import { templateIdForId } from '../src/templates/index.js'
 
 const templateIds = [
-  'nore-minimal',
-  'nore-logo-only',
-  'nore-logo-only-dark',
-  'nore-report',
-  'nore-night',
-  'nore-spotlight',
-  'nore-stack',
-  'nore-signal',
-  'nore-blueprint',
-  'nore-central',
+  'minimal',
+  'logo-only',
+  'logo-only-dark',
+  'night',
+  'spotlight',
+  'stack',
+  'blueprint',
+  'central',
+  'logo-text-white',
+  'logo-text-dark',
+  'logo-text-gradient',
+  'logo-text-grid',
+  'logo-text-ink',
+  'logo-text-prism',
+  'logo-text-mist',
+  'logo-text-mono',
+  'signal-white',
+  'signal-dark',
+  'signal-gradient',
+  'signal-grid',
+  'signal-ink',
+  'signal-prism',
+  'signal-mist',
+  'signal-mono',
+  'logo-center-white',
+  'logo-center-dark',
+  'logo-center-gradient',
+  'logo-center-grid',
+  'logo-center-ink',
+  'logo-center-prism',
+  'logo-center-mist',
+  'logo-center-mono',
+  'logo-large-white',
+  'logo-large-dark',
+  'logo-large-gradient',
+  'logo-large-grid',
+  'logo-large-ink',
+  'logo-large-prism',
+  'logo-large-mist',
+  'logo-large-mono',
   'gradient-midnight',
   'gradient-aurora',
   'gradient-prism',
@@ -30,7 +64,6 @@ const templateIds = [
   'grid-hexagon',
   'paper-ledger',
   'paper-brief',
-  'paper-masthead',
   'ink-column',
   'ink-focus',
   'ink-statement',
@@ -39,19 +72,15 @@ const templateIds = [
   'midnight-block',
   'aurora-column',
   'aurora-focus',
-  'aurora-mark',
   'prism-focus',
   'prism-brief',
-  'prism-masthead',
   'sunset-column',
   'sunset-focus',
   'sunset-statement',
   'mist-story',
   'mist-brief',
-  'mist-mark',
   'mono-focus',
   'mono-folio',
-  'mono-masthead',
   'grid-light-column',
   'grid-light-focus',
   'grid-dark-column',
@@ -59,6 +88,24 @@ const templateIds = [
   'system-kernel-panic',
   'system-bios',
   'community-apple-financial',
+] as const
+
+const removedTemplateIds = [
+  'nore-minimal',
+  'nore-logo-only',
+  'nore-logo-only-dark',
+  'nore-report',
+  'nore-night',
+  'nore-spotlight',
+  'nore-stack',
+  'nore-signal',
+  'nore-blueprint',
+  'nore-central',
+  'paper-masthead',
+  'aurora-mark',
+  'prism-masthead',
+  'mist-mark',
+  'mono-masthead',
 ] as const
 
 const webFixtureRoot = fileURLToPath(new URL('./fixtures/web/', import.meta.url))
@@ -84,6 +131,11 @@ test('rejects access settings that cannot serve traffic', () => {
   )
 })
 
+test('does not resolve removed template IDs', () => {
+  for (const templateId of removedTemplateIds)
+    assert.equal(templateIdForId(templateId), defaultTemplateId)
+})
+
 test('serves the bundled web UI without shadowing API routes', async () => {
   const app = await createApp({ token: null, webRoot: webFixtureRoot })
 
@@ -106,6 +158,26 @@ test('serves the bundled web UI without shadowing API routes', async () => {
 
     const health = await app.inject({ method: 'GET', url: '/api/health' })
     assert.equal(health.statusCode, 200)
+
+    const missing = await app.inject({ method: 'GET', url: '/not-found' })
+    assert.equal(missing.statusCode, 404)
+    assert.equal(missing.body, '')
+    assert.equal(missing.headers['content-type'], undefined)
+  } finally {
+    await app.close()
+  }
+})
+
+test('returns an empty HTTP 404 for unknown routes', async () => {
+  const app = await createApp({ token: null })
+
+  try {
+    for (const url of ['/', '/123', '/notfound']) {
+      const response = await app.inject({ method: 'GET', url })
+      assert.equal(response.statusCode, 404)
+      assert.equal(response.body, '')
+      assert.equal(response.headers['content-type'], undefined)
+    }
   } finally {
     await app.close()
   }
@@ -136,7 +208,27 @@ test('exposes health and template metadata without a token by default', async ()
     assert.equal('background' in response.json().defaults, false)
     assert.equal('layout' in response.json().defaults, false)
     assert.equal('styles' in response.json().defaults, false)
+    assert.equal(response.json().defaults.logoId, defaultLogoId)
     assert.equal(response.json().defaults.template, 'gradient-sunset')
+    assert.equal(response.json().logos.defaultId, defaultLogoId)
+    assert.equal(response.json().logos.noneId, noLogoId)
+    assert.equal(response.json().logos.items[0]?.id, defaultLogoId)
+    assert.equal(response.json().logos.items[1]?.id, inverseLogoId)
+    const templateDefaults = new Map(
+      response
+        .json()
+        .templates.map((template: { defaultLogoId: string; id: string }) => [
+          template.id,
+          template.defaultLogoId,
+        ]),
+    )
+    assert.equal(templateDefaults.get('logo-only-dark'), inverseLogoId)
+    assert.equal(templateDefaults.get('night'), inverseLogoId)
+    assert.equal(templateDefaults.get('signal-gradient'), inverseLogoId)
+    assert.equal(templateDefaults.get('gradient-horizon'), inverseLogoId)
+    assert.equal(templateDefaults.get('grid-hexagon'), inverseLogoId)
+    assert.equal(templateDefaults.get('aurora-column'), inverseLogoId)
+    assert.equal(templateDefaults.get('minimal'), defaultLogoId)
     assert.deepEqual(
       response.json().renderBehavior.defaults,
       defaultGlobalRenderBehavior,
@@ -151,6 +243,20 @@ test('exposes health and template metadata without a token by default', async ()
   } finally {
     await app.close()
   }
+})
+
+test('uses the template logo default unless the request selects a logo', () => {
+  assert.equal(renderInputFromUnknown({ template: 'night' }).logoId, inverseLogoId)
+  assert.equal(
+    renderInputFromUnknown({ logoId: 'unknown', template: 'gradient-horizon' })
+      .logoId,
+    inverseLogoId,
+  )
+  assert.equal(
+    renderInputFromUnknown({ logoId: defaultLogoId, template: 'night' }).logoId,
+    defaultLogoId,
+  )
+  assert.equal(renderInputFromUnknown({ template: 'minimal' }).logoId, defaultLogoId)
 })
 
 test('keeps anonymous API access enabled when a token is configured', async () => {
@@ -372,7 +478,7 @@ test('applies global render behavior to SVG and PNG output', async () => {
       contentRadius: 'auto',
       lang: 'zh-CN',
       seed: 'rounded-output',
-      template: 'nore-minimal',
+      template: 'minimal',
       title: '全局渲染行为',
     })
     const svg = await app.inject({
@@ -446,7 +552,7 @@ test('renders seeded output deterministically', async () => {
           brandName: 'Nore Seed',
           format: 'svg',
           seed,
-          template: 'nore-report',
+          template: 'logo-text-gradient',
         },
       })
 

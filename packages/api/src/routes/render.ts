@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import { ZodError } from 'zod'
 
-import { customLogoId, logoOptions } from '../../assets/logo/index.js'
+import { customLogoId, logoOptions, noLogoId } from '../../assets/logo/index.js'
 import {
   defaultAuthor,
   defaultBrandName,
@@ -119,6 +119,7 @@ export const registerRenderRoutes = async (
           customId: customLogoId,
           defaultId: defaultLogoId,
           items: logoOptions,
+          noneId: noLogoId,
         },
         renderBehavior: globalRenderBehaviorCatalog,
         templates: templateOptions,

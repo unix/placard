@@ -1,15 +1,26 @@
 <svg
-  width="64"
-  height="64"
+  width="512"
+  height="512"
   viewBox="0 0 64 64"
   fill="none"
   xmlns="http://www.w3.org/2000/svg">
-  <rect width="64" height="64" rx="14" fill="#09090b" />
-  <rect x="12" y="12" width="40" height="30" rx="6" fill="#ffffff" />
-  <rect x="29" y="39" width="6" height="15" rx="3" fill="#ffffff" />
-  <path
-    d="M21 23H43M21 31H37"
-    stroke="#09090b"
-    stroke-width="4"
-    stroke-linecap="round" />
+  <g transform="translate(-8 10)" fill="#111111">
+    <rect
+      x="27"
+      y="8"
+      width="26"
+      height="31"
+      rx="5"
+      opacity="0.3"
+      transform="rotate(-14 40 39)" />
+    <rect
+      x="27"
+      y="8"
+      width="26"
+      height="31"
+      rx="5"
+      opacity="0.6"
+      transform="rotate(14 40 39)" />
+    <rect x="27" y="8" width="26" height="31" rx="5" opacity="0.88" />
+  </g>
 </svg>

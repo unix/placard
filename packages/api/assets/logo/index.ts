@@ -4,7 +4,8 @@ import { fileURLToPath } from 'node:url'
 
 export const customLogoId = 'custom'
 export const noLogoId = 'none'
-export const defaultLogoId = noLogoId
+export const defaultLogoId = 'placard'
+export const inverseLogoId = 'placard-inverse'
 
 const moduleDirectory = path.dirname(fileURLToPath(import.meta.url))
 const compiledPackageDirectory = path.resolve(moduleDirectory, '..', '..')
@@ -20,6 +21,12 @@ const svgDataUrl = (fileName: string) => {
 }
 
 export const logos = [
+  { id: 'placard', name: 'Placard', src: svgDataUrl('placard.svg') },
+  {
+    id: inverseLogoId,
+    name: 'Placard Inverse',
+    src: svgDataUrl('placard-inverse.svg'),
+  },
   { id: 'nore-dark', name: 'Nore Dark', src: svgDataUrl('nore-dark.svg') },
   { id: 'nore-white', name: 'Nore White', src: svgDataUrl('nore-white.svg') },
   { id: 'secret-dark', name: 'Secret Dark', src: svgDataUrl('secret-dark.svg') },

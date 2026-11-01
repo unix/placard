@@ -19,10 +19,11 @@ import {
   maxTemplateIdLength,
   maxTitleLength as defaultMaxTitleLength,
 } from '../constants.js'
-import { customLogoId, logoForId } from '../../assets/logo/index.js'
+import { customLogoId, logoForId, noLogoId } from '../../assets/logo/index.js'
 import { minTruncationLength, textLength, truncateText } from './text-length.js'
 import { allowedRemoteImageUrl } from './remote-image.js'
 import { templateIdForId } from '../templates/index.js'
+import { defaultLogoIdForTemplate } from '../templates/default-logo.js'
 
 const formatSchema = z.enum(['png', 'svg']).default('png')
 
@@ -72,7 +73,12 @@ const logoIdField = z.preprocess(
     .max(maxLogoIdLength)
     .default(defaultLogoId)
     .transform(value => {
-      if (value === customLogoId || value === defaultLogoId || logoForId(value))
+      if (
+        value === customLogoId ||
+        value === noLogoId ||
+        value === defaultLogoId ||
+        logoForId(value)
+      )
         return value
       return defaultLogoId
     }),
@@ -111,8 +117,20 @@ const inputObjectFromUnknown = (value: unknown) => {
   if (value == null) return {}
   if (typeof value === 'string' && value.trim().length === 0) return {}
   if (typeof value !== 'object' || Array.isArray(value)) return value
-  if ('author' in value || !('author[]' in value)) return value
-  return { ...value, author: Reflect.get(value, 'author[]') }
+  const input =
+    'author' in value || !('author[]' in value)
+      ? value
+      : { ...value, author: Reflect.get(value, 'author[]') }
+  const template = templateIdForId(
+    stringFromUnknown(Reflect.get(input, 'template')) ?? defaultTemplateId,
+  )
+  const logoId = stringFromUnknown(Reflect.get(input, 'logoId'))
+  if (
+    logoId &&
+    (logoId === customLogoId || logoId === noLogoId || logoForId(logoId))
+  )
+    return input
+  return { ...input, logoId: defaultLogoIdForTemplate(template) }
 }
 
 const renderInputObjectSchema = z

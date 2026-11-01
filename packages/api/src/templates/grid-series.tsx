@@ -13,7 +13,7 @@ import type { OgTemplate } from './types.js'
 type GridPatternKind = 'dot' | 'hexagon' | 'pattern'
 type GridCoordinate = readonly [column: number, row: number]
 
-interface GridPreset {
+export interface GridPreset {
   readonly accentColor: string
   readonly backgroundColor: string
   readonly backdrop: string
@@ -170,7 +170,7 @@ const patternImage = (preset: GridPreset, random: () => number) => {
   return squarePatternSvg(preset, random)
 }
 
-const GridFrame = ({
+export const GridFrame = ({
   children,
   preset,
   random,
@@ -245,6 +245,17 @@ const defineGridTemplate = ({
   ),
 })
 
+export const gridPatternPreset = {
+  accentColor: '#2563eb',
+  backgroundColor: '#f8fafc',
+  backdrop:
+    'linear-gradient(90deg, rgba(248, 250, 252, 0.98) 0%, rgba(248, 250, 252, 0.91) 58%, rgba(248, 250, 252, 0.2) 100%)',
+  mutedTextColor: '#475569',
+  patternColor: '#64748b',
+  patternKind: 'pattern',
+  textColor: '#0f172a',
+} as const satisfies GridPreset
+
 export const gridTemplates = [
   defineGridTemplate({
     id: 'grid-pattern',
@@ -252,16 +263,7 @@ export const gridTemplates = [
     description:
       'A light seeded square grid with a simple framed title composition.',
     style: 'around',
-    preset: {
-      accentColor: '#2563eb',
-      backgroundColor: '#f8fafc',
-      backdrop:
-        'linear-gradient(90deg, rgba(248, 250, 252, 0.98) 0%, rgba(248, 250, 252, 0.91) 58%, rgba(248, 250, 252, 0.2) 100%)',
-      mutedTextColor: '#475569',
-      patternColor: '#64748b',
-      patternKind: 'pattern',
-      textColor: '#0f172a',
-    },
+    preset: gridPatternPreset,
   }),
   defineGridTemplate({
     id: 'grid-dark',

@@ -188,11 +188,11 @@ const inputPresets: readonly InputPreset[] = [
     description: 'Full metadata with author, brand, date, and logo.',
     input: {
       author: 'Mira Chen',
-      brandName: 'Nore Journal',
+      brandName: 'Placard Journal',
       date: 'July 9, 2026',
       description:
         'A practical breakdown of how product teams can turn release notes into durable Open Graph previews without hand-tuning every share image.',
-      logoId: 'secret-dark',
+      logoId: 'placard',
       logoUrl: '',
       title: 'Designing Open Graph Images for Product Updates',
     },
@@ -204,7 +204,7 @@ const inputPresets: readonly InputPreset[] = [
     description: 'A publication homepage without article-level metadata.',
     input: {
       author: '',
-      brandName: 'Nore Journal',
+      brandName: 'Placard Journal',
       date: 'Updated weekly',
       description:
         'Essays, changelogs, and field notes for building calm software products with reliable defaults.',
@@ -231,7 +231,7 @@ const inputPresets: readonly InputPreset[] = [
         '陈栖迟 Valentina Rossetti',
         '赵明瑶 Octavianus Severinus',
       ],
-      brandName: 'Nore Journal',
+      brandName: 'Placard Journal',
       date: 'July 9, 2026',
       description:
         'A collaborative field report on how design, product, engineering, and editorial teams shape reliable Open Graph previews together.',
@@ -312,7 +312,7 @@ const inputPresets: readonly InputPreset[] = [
     description: 'Dark surface with full article metadata.',
     input: {
       author: 'Mira Chen',
-      brandName: 'Nore Journal',
+      brandName: 'Placard Journal',
       date: 'July 9, 2026',
       description:
         'A restrained dark preview for writing that benefits from stronger contrast while keeping metadata out of the title area.',
@@ -387,10 +387,11 @@ const presetCopy = (locale: Locale, preset: InputPreset) =>
   localizedPresetCopy[locale][preset.id] ?? preset
 
 const firstInputPreset = inputPresets[0]
+const initialTemplateId = 'minimal'
 
 const initialInput: RenderInput = {
   ...firstInputPreset.input,
-  template: 'gradient-sunset',
+  template: initialTemplateId,
 }
 
 const initialInputDefaults: RenderInput = {
@@ -398,7 +399,7 @@ const initialInputDefaults: RenderInput = {
   brandName: '',
   date: '',
   description: '',
-  logoId: 'none',
+  logoId: 'placard',
   logoUrl: '',
   template: 'gradient-sunset',
   title: 'Untitled page',
@@ -417,8 +418,9 @@ const initialLimits: TemplateCatalog['limits'] = {
 
 const initialLogos: TemplateCatalog['logos'] = {
   customId: 'custom',
-  defaultId: 'none',
+  defaultId: 'placard',
   items: [],
+  noneId: 'none',
 }
 
 const initialImage: TemplateCatalog['image'] = {
@@ -551,6 +553,11 @@ const authorFromEditorValue = (value: string): RenderInput['author'] => {
 const templateFromQuery = (templates: readonly TemplateMeta[], fallback: string) => {
   const template = new URLSearchParams(window.location.search).get('template')
   if (template && templates.some(item => item.id === template)) return template
+  if (
+    !window.location.search &&
+    templates.some(item => item.id === initialTemplateId)
+  )
+    return initialTemplateId
   if (templates.some(item => item.id === fallback)) return fallback
   return templates.at(0)?.id ?? fallback
 }
@@ -592,6 +599,9 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
   const [input, setInput] = useState<RenderInput>(initialInput)
   const [inputDefaults, setInputDefaults] =
     useState<RenderInput>(initialInputDefaults)
+  const [templateDefaultLogoIds, setTemplateDefaultLogoIds] = useState<
+    Readonly<Record<string, string>>
+  >({})
   const [templates, setTemplates] = useState<readonly TemplateSummary[]>([])
   const [favoriteTemplateIds, setFavoriteTemplateIds] = useState<readonly string[]>(
     [],
@@ -647,7 +657,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
   }, [favoriteTemplateIds, templates])
   const logoItems = useMemo(
     () => [
-      { label: copy.noLogo, value: logos.defaultId },
+      { label: copy.noLogo, value: logos.noneId },
       ...logos.items.map(logo => ({ label: logo.name, value: logo.id })),
       { label: copy.customLogo, value: logos.customId },
     ],
@@ -821,11 +831,22 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
           catalog.templates,
           catalog.defaults.template,
         )
-        const nextInput = inputFromPreset(firstInputPreset, template)
+        const defaultLogoIds = Object.fromEntries(
+          catalog.templates.map(templateMeta => [
+            templateMeta.id,
+            templateMeta.defaultLogoId,
+          ]),
+        )
+        const nextInput = {
+          ...inputFromPreset(firstInputPreset, template),
+          logoId: defaultLogoIds[template] ?? catalog.defaults.logoId,
+          logoUrl: catalog.defaults.logoUrl,
+        }
         setLimits(catalog.limits)
         setLogos(catalog.logos)
         setImage(catalog.image)
         setInputDefaults(catalog.defaults)
+        setTemplateDefaultLogoIds(defaultLogoIds)
         setRenderBehaviorCatalog(catalog.renderBehavior)
         setRenderBehavior(storedRenderBehavior)
         setDraftRenderBehavior(storedRenderBehavior)
@@ -874,13 +895,25 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
       if (!template) return
       setIsTemplateDialogOpen(false)
       if (template === input.template) return
-      const nextInput = { ...input, template }
+      const currentDefaultLogoId =
+        templateDefaultLogoIds[input.template] ?? logos.defaultId
+      const nextDefaultLogoId = templateDefaultLogoIds[template] ?? logos.defaultId
+      const logoId =
+        input.logoId === currentDefaultLogoId ? nextDefaultLogoId : input.logoId
+      const nextInput = { ...input, logoId, template }
       setInput(nextInput)
       updateTemplateQuery(template)
       if (!canRender) return
       void renderPreview(nextInput, renderBehavior)
     },
-    [canRender, input, renderBehavior, renderPreview],
+    [
+      canRender,
+      input,
+      logos.defaultId,
+      renderBehavior,
+      renderPreview,
+      templateDefaultLogoIds,
+    ],
   )
 
   const toggleTemplateFavorite = useCallback(async () => {
@@ -1021,7 +1054,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
           <div className="flex min-w-0 items-center gap-2.5">
             <img
               alt="Placard"
-              className="size-7 rounded-md"
+              className="size-7 dark:invert"
               height="28"
               src="/logo/logo.svg"
               width="28"
@@ -1245,7 +1278,7 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
                               align="start"
                               alignItemWithTrigger={false}>
                               <SelectGroup>
-                                <SelectItem value={logos.defaultId}>
+                                <SelectItem value={logos.noneId}>
                                   {copy.noLogo}
                                 </SelectItem>
                                 {logos.items.map(logo => (

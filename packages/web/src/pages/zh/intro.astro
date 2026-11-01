@@ -32,7 +32,7 @@ const parameters = [
   [
     'logoId',
     'string',
-    'none',
+    'placard',
     '内置 Logo ID、none 或 custom，最多 80 个字符；可通过 GET /api/templates 获取目录。',
   ],
   [
@@ -142,7 +142,7 @@ const tableCodeClassName =
       <a class="flex items-center gap-2.5" href="/zh">
         <img
           alt="Placard"
-          class="size-7 rounded-md"
+          class="size-7 dark:invert"
           height="28"
           src="/logo/logo.svg"
           width="28"
@@ -297,7 +297,8 @@ docker run --detach \
       <p class="mt-3 text-sm leading-7 text-muted-foreground">
         使用 Docker 的 --env 或 --env-file
         传入运行时配置。正整数配置为空或无效时，使用表中默认值。API 默认监听
-        3003；如需更换端口，同时设置 PORT 并发布对应的容器端口即可，无需重新构建镜像。
+        3003；如需更换端口，同时设置 PORT
+        并发布对应的容器端口即可，无需重新构建镜像。
       </p>
       <div class={tableContainerClassName}>
         <table class={tableClassName}>

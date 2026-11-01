@@ -28,12 +28,8 @@ const {
 } = Astro.props
 
 const siteUrl = import.meta.env.PUBLIC_SITE_URL?.trim()
-const canonicalUrl = siteUrl
-  ? new URL(Astro.url.pathname, siteUrl)
-  : undefined
-const openGraphImageUrl = siteUrl
-  ? new URL('/logo/og.png', siteUrl)
-  : undefined
+const canonicalUrl = siteUrl ? new URL(Astro.url.pathname, siteUrl) : undefined
+const openGraphImageUrl = new URL('/logo/og.png', 'https://placard.witt.im')
 ---
 
 <!doctype html>
@@ -52,29 +48,17 @@ const openGraphImageUrl = siteUrl
     {canonicalUrl ? <meta property="og:url" content={canonicalUrl} /> : null}
     <meta property="og:locale" content={openGraphLocale} />
     <meta property="og:locale:alternate" content={alternateOpenGraphLocale} />
-    {
-      openGraphImageUrl ? (
-        <>
-          <meta property="og:image" content={openGraphImageUrl} />
-          <meta property="og:image:secure_url" content={openGraphImageUrl} />
-          <meta property="og:image:type" content="image/png" />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="675" />
-          <meta property="og:image:alt" content={imageAlt} />
-        </>
-      ) : null
-    }
+    <meta property="og:image" content={openGraphImageUrl} />
+    <meta property="og:image:secure_url" content={openGraphImageUrl} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="675" />
+    <meta property="og:image:alt" content={imageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    {
-      openGraphImageUrl ? (
-        <>
-          <meta name="twitter:image" content={openGraphImageUrl} />
-          <meta name="twitter:image:alt" content={imageAlt} />
-        </>
-      ) : null
-    }
+    <meta name="twitter:image" content={openGraphImageUrl} />
+    <meta name="twitter:image:alt" content={imageAlt} />
     <ThemeInit />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
