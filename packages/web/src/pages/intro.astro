@@ -326,22 +326,18 @@ const tableCodeClassName =
     <section class="mt-12 scroll-mt-8" id="self-host">
       <h2 class="text-lg font-medium">Self-hosting</h2>
       <p class="mt-3 text-sm leading-7 text-muted-foreground">
-        Get the <a
+        Run the image published on the <a
           class="text-foreground underline underline-offset-4"
-          href="https://github.com/unix/placard">source code</a
-        >, then build and run the Docker image from the repository root. The image
-        includes both the Web UI and rendering API:
+          href="https://github.com/unix/placard/pkgs/container/placard"
+          >GitHub Container Registry</a
+        >. It includes both the Web UI and rendering API:
       </p>
       <pre
-        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker build --tag placard .
-docker run --detach \
-  --name placard \
-  --restart unless-stopped \
-  --publish 3003:3003 \
-  placard</code></pre>
+        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach --publish 80:3003 ghcr.io/unix/placard:latest</code></pre>
       <p class="mt-4 text-sm leading-7 text-muted-foreground">
-        Open http://localhost:3003 for the UI. The browser calls the API under /api
-        on the same origin, so a Docker deployment does not need an API address.
+        Open http://localhost for the UI. Port 80 on the host maps to the container's
+        default port 3003. The browser calls the API under /api on the same origin,
+        so a Docker deployment does not need an API address.
       </p>
 
       <h3 class="mt-10 scroll-mt-8 text-base font-medium" id="environment">
@@ -350,8 +346,8 @@ docker run --detach \
       <p class="mt-3 text-sm leading-7 text-muted-foreground">
         Pass runtime settings with Docker --env or --env-file. Empty or invalid
         positive-integer values use the documented defaults. The API listens on port
-        3003 by default; set PORT and publish the same container port to override it
-        without rebuilding the image.
+        3003 inside the container by default. Publish any available host port to that
+        container port; set PORT only when the internal port must change.
       </p>
       <div class={tableContainerClassName}>
         <table class={tableClassName}>
@@ -380,34 +376,24 @@ docker run --detach \
         </table>
       </div>
 
-      <pre
-        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
-  --name placard \
-  --env PORT=13003 \
-  --publish 13003:13003 \
-  placard</code></pre>
-
       <h3 class="mt-10 text-base font-medium">Configuration examples</h3>
       <p class="mt-3 text-sm leading-7 text-muted-foreground">
-        To run an API-only container that rejects anonymous requests, disable both
-        the Web UI and anonymous traffic, then configure a token:
+        For a long-running deployment, give the container a name and restart it
+        automatically:
       </p>
       <pre
         class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
-  --name placard-api \
+  --name placard \
   --restart unless-stopped \
-  --publish 3003:3003 \
-  --env OG_WEB_ENABLED=false \
-  --env OG_ALLOW_ANONYMOUS=false \
-  --env OG_INTERNAL_TOKEN=replace-with-a-secret \
-  placard</code></pre>
+  --publish 80:3003 \
+  ghcr.io/unix/placard:latest</code></pre>
       <p class="mt-4 text-sm leading-7 text-muted-foreground">
         For several settings, place them in an environment file and pass it to
         Docker:
       </p>
       <pre
         class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code># placard.env
-OG_WEB_ENABLED=false
+OG_WEB_ENABLED=true
 OG_ALLOW_ANONYMOUS=true
 OG_INTERNAL_TOKEN=replace-with-a-secret
 OG_RATE_LIMIT_MAX=1200
@@ -416,9 +402,9 @@ LOG_LEVEL=info</code></pre>
         class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
   --name placard-api \
   --restart unless-stopped \
-  --publish 3003:3003 \
+  --publish 80:3003 \
   --env-file ./placard.env \
-  placard</code></pre>
+  ghcr.io/unix/placard:latest</code></pre>
     </section>
 
     <section class="mt-12 scroll-mt-8" id="performance">

@@ -274,21 +274,18 @@ const tableCodeClassName =
     <section class="mt-12 scroll-mt-8" id="self-host">
       <h2 class="text-lg font-medium">自部署</h2>
       <p class="mt-3 text-sm leading-7 text-muted-foreground">
-        获取<a
+        直接运行发布在 <a
           class="text-foreground underline underline-offset-4"
-          href="https://github.com/unix/placard">源码</a
-        >后，在仓库根目录构建并运行 Docker 镜像。镜像同时包含 Web UI 与渲染 API：
+          href="https://github.com/unix/placard/pkgs/container/placard"
+          >GitHub Container Registry</a
+        > 的镜像。镜像同时包含 Web UI 与渲染 API：
       </p>
       <pre
-        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker build --tag placard .
-docker run --detach \
-  --name placard \
-  --restart unless-stopped \
-  --publish 3003:3003 \
-  placard</code></pre>
+        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach --publish 80:3003 ghcr.io/unix/placard:latest</code></pre>
       <p class="mt-4 text-sm leading-7 text-muted-foreground">
-        打开 http://localhost:3003 即可使用 Web UI。浏览器通过同源的 /api 路径访问
-        API，因此 Docker 部署无需填写 API 地址。
+        打开 http://localhost 即可使用 Web UI。宿主机的 80 端口会映射到容器内默认的
+        3003 端口。浏览器通过同源的 /api 路径访问 API，因此 Docker 部署无需填写 API
+        地址。
       </p>
 
       <h3 class="mt-10 scroll-mt-8 text-base font-medium" id="environment">
@@ -296,9 +293,10 @@ docker run --detach \
       </h3>
       <p class="mt-3 text-sm leading-7 text-muted-foreground">
         使用 Docker 的 --env 或 --env-file
-        传入运行时配置。正整数配置为空或无效时，使用表中默认值。API 默认监听
-        3003；如需更换端口，同时设置 PORT
-        并发布对应的容器端口即可，无需重新构建镜像。
+        传入运行时配置。正整数配置为空或无效时，使用表中默认值。API 默认监听 容器内的
+        3003
+        端口；可以将任意可用的宿主机端口映射到该端口，仅在需要更改容器内部端口时设置
+        PORT。
       </p>
       <div class={tableContainerClassName}>
         <table class={tableClassName}>
@@ -327,33 +325,22 @@ docker run --detach \
         </table>
       </div>
 
-      <pre
-        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
-  --name placard \
-  --env PORT=13003 \
-  --publish 13003:13003 \
-  placard</code></pre>
-
       <h3 class="mt-10 text-base font-medium">配置示例</h3>
       <p class="mt-3 text-sm leading-7 text-muted-foreground">
-        如需仅运行 API 并拒绝匿名请求，需要同时关闭 Web UI、关闭匿名流量并配置
-        Token：
+        长期运行时，可以为容器设置名称和自动重启策略：
       </p>
       <pre
         class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
-  --name placard-api \
+  --name placard \
   --restart unless-stopped \
-  --publish 3003:3003 \
-  --env OG_WEB_ENABLED=false \
-  --env OG_ALLOW_ANONYMOUS=false \
-  --env OG_INTERNAL_TOKEN=replace-with-a-secret \
-  placard</code></pre>
+  --publish 80:3003 \
+  ghcr.io/unix/placard:latest</code></pre>
       <p class="mt-4 text-sm leading-7 text-muted-foreground">
         配置项较多时，可以写入环境变量文件，再交给 Docker 读取：
       </p>
       <pre
         class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code># placard.env
-OG_WEB_ENABLED=false
+OG_WEB_ENABLED=true
 OG_ALLOW_ANONYMOUS=true
 OG_INTERNAL_TOKEN=replace-with-a-secret
 OG_RATE_LIMIT_MAX=1200
@@ -362,9 +349,9 @@ LOG_LEVEL=info</code></pre>
         class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
   --name placard-api \
   --restart unless-stopped \
-  --publish 3003:3003 \
+  --publish 80:3003 \
   --env-file ./placard.env \
-  placard</code></pre>
+  ghcr.io/unix/placard:latest</code></pre>
     </section>
 
     <section class="mt-12 scroll-mt-8" id="performance">
