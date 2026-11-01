@@ -130,24 +130,24 @@ const tableCodeClassName =
 
 <MainLayout
   alternateOpenGraphLocale="en_US"
-  description="了解如何使用 Nore OG 为应用批量、自动化生成指定风格的卡片，以及图片渲染 API、配置参数、性能与自部署方式。"
-  imageAlt="Nore OG 服务端 Open Graph 卡片生成器"
+  description="了解如何使用 Placard 为应用批量、自动化生成指定风格的社交图片，以及图片渲染 API、配置参数、性能与自部署方式。"
+  imageAlt="Placard 开源社交图片渲染器"
   lang="zh-CN"
   openGraphLocale="zh_CN"
-  title="Nore OG 介绍 · 服务端 Open Graph 卡片生成器">
+  title="Placard 介绍 · 开源社交图片渲染器">
   <header class="border-b">
     <nav
       aria-label="主导航"
       class="mx-auto flex h-14 w-full max-w-4xl items-center justify-between px-4">
       <a class="flex items-center gap-2.5" href="/zh">
         <img
-          alt="Nore OG"
+          alt="Placard"
           class="size-7 rounded-md"
           height="28"
           src="/logo/logo.svg"
           width="28"
         />
-        <span class="hidden text-sm font-medium sm:inline">Nore OG</span>
+        <span class="hidden text-sm font-medium sm:inline">Placard</span>
       </a>
       <div class="flex items-center gap-1 text-xs">
         <a
@@ -175,10 +175,10 @@ const tableCodeClassName =
   <main class="mx-auto w-full max-w-2xl px-4 py-16 sm:py-24">
     <section>
       <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl">
-        Open Graph 图片生成工具
+        开源社交图片渲染器
       </h1>
       <p class="mt-5 text-sm leading-7 text-muted-foreground">
-        Nore OG
+        Placard
         是一个运行在服务端的卡片生成器，适用于为应用批量、自动化地生成指定风格的卡片。它可以生成链接分享时显示的预览图：选择模板、填入标题和摘要，即可预览并下载
         SVG 或 PNG 图片。
       </p>
@@ -197,7 +197,7 @@ const tableCodeClassName =
       <p class="mt-3 text-sm leading-7 text-muted-foreground">
         本站仅供演示，不保证 API 可用性。请按下方说明<a
           class="text-foreground underline underline-offset-4"
-          href="#self-host">自部署 Nore OG</a
+          href="#self-host">自部署 Placard</a
         >，并使用自己的 API 地址。
       </p>
       <div class={tableContainerClassName}>
@@ -276,16 +276,16 @@ const tableCodeClassName =
       <p class="mt-3 text-sm leading-7 text-muted-foreground">
         获取<a
           class="text-foreground underline underline-offset-4"
-          href="https://github.com/norehq/og">源码</a
+          href="https://github.com/unix/placard">源码</a
         >后，在仓库根目录构建并运行 Docker 镜像。镜像同时包含 Web UI 与渲染 API：
       </p>
       <pre
-        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker build --tag nore-og .
+        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker build --tag placard .
 docker run --detach \
-  --name nore-og \
+  --name placard \
   --restart unless-stopped \
   --publish 3003:3003 \
-  nore-og</code></pre>
+  placard</code></pre>
       <p class="mt-4 text-sm leading-7 text-muted-foreground">
         打开 http://localhost:3003 即可使用 Web UI。浏览器通过同源的 /api 路径访问
         API，因此 Docker 部署无需填写 API 地址。
@@ -328,10 +328,10 @@ docker run --detach \
 
       <pre
         class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
-  --name nore-og \
+  --name placard \
   --env PORT=13003 \
   --publish 13003:13003 \
-  nore-og</code></pre>
+  placard</code></pre>
 
       <h3 class="mt-10 text-base font-medium">配置示例</h3>
       <p class="mt-3 text-sm leading-7 text-muted-foreground">
@@ -340,18 +340,18 @@ docker run --detach \
       </p>
       <pre
         class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
-  --name nore-og-api \
+  --name placard-api \
   --restart unless-stopped \
   --publish 3003:3003 \
   --env OG_WEB_ENABLED=false \
   --env OG_ALLOW_ANONYMOUS=false \
   --env OG_INTERNAL_TOKEN=replace-with-a-secret \
-  nore-og</code></pre>
+  placard</code></pre>
       <p class="mt-4 text-sm leading-7 text-muted-foreground">
         配置项较多时，可以写入环境变量文件，再交给 Docker 读取：
       </p>
       <pre
-        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code># nore-og.env
+        class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code># placard.env
 OG_WEB_ENABLED=false
 OG_ALLOW_ANONYMOUS=true
 OG_INTERNAL_TOKEN=replace-with-a-secret
@@ -359,11 +359,11 @@ OG_RATE_LIMIT_MAX=1200
 LOG_LEVEL=info</code></pre>
       <pre
         class="mt-4 overflow-x-auto rounded-lg border bg-muted/30 p-4 font-mono text-xs leading-6"><code>docker run --detach \
-  --name nore-og-api \
+  --name placard-api \
   --restart unless-stopped \
   --publish 3003:3003 \
-  --env-file ./nore-og.env \
-  nore-og</code></pre>
+  --env-file ./placard.env \
+  placard</code></pre>
     </section>
 
     <section class="mt-12 scroll-mt-8" id="performance">

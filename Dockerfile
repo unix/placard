@@ -12,23 +12,23 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 FROM base AS api-build
 
 COPY packages/api/package.json packages/api/package.json
-RUN pnpm install --filter @norehq/open-graph-api... --frozen-lockfile
+RUN pnpm install --filter @unix/placard-api... --frozen-lockfile
 
 COPY packages/api packages/api
-RUN pnpm --filter @norehq/open-graph-api build
+RUN pnpm --filter @unix/placard-api build
 
 # This is pnpm's workspace packaging command, not a package deploy script.
 # It copies the built API and production dependencies into /release.
-RUN pnpm --filter @norehq/open-graph-api deploy --legacy --prod /release
+RUN pnpm --filter @unix/placard-api deploy --legacy --prod /release
 
 FROM base AS web-build
 
 COPY packages/web/package.json packages/web/package.json
 # Wrangler is a dev dependency and is intentionally omitted from Docker.
-RUN pnpm install --filter @norehq/open-graph-web... --prod --frozen-lockfile
+RUN pnpm install --filter @unix/placard-web... --prod --frozen-lockfile
 
 COPY packages/web packages/web
-RUN pnpm --filter @norehq/open-graph-web build
+RUN pnpm --filter @unix/placard-web build
 
 FROM alpine:3.24 AS runtime
 

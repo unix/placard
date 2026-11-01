@@ -131,9 +131,9 @@ const existingSnapshotIsUsable = async () => {
 const thumbnailPath = templateId => {
   const search = new URLSearchParams({
     author: 'Nore',
-    brandName: 'Nore OG',
+    brandName: 'Placard',
     date: '2026-08-22',
-    description: 'A programmable, self-hosted Open Graph image renderer by Nore.',
+    description: 'An open-source social image renderer.',
     logoId: 'nore-dark',
     seed: 'catalog-preview',
     template: templateId,

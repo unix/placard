@@ -115,7 +115,7 @@ const templateGalleryLocales = {
     title: 'Title',
     updatePreview: 'Update preview',
     waitingForTemplate: 'Waiting for template',
-    workbenchLabel: 'Nore OG workbench',
+    workbenchLabel: 'Placard workbench',
   },
   'zh-CN': {
     addFavorite: '添加收藏',
@@ -166,7 +166,7 @@ const templateGalleryLocales = {
     title: '标题',
     updatePreview: '更新预览',
     waitingForTemplate: '等待模板',
-    workbenchLabel: 'Nore OG 工作台',
+    workbenchLabel: 'Placard 工作台',
   },
 } as const satisfies Record<Locale, Record<string, string>>
 
@@ -1020,13 +1020,13 @@ export const TemplateGallery = ({ locale = defaultLocale }: { locale?: Locale })
         <div className="flex h-14 min-w-0 shrink-0 items-center justify-between gap-2 border-b px-3 sm:gap-4 sm:px-4">
           <div className="flex min-w-0 items-center gap-2.5">
             <img
-              alt="Nore OG"
+              alt="Placard"
               className="size-7 rounded-md"
               height="28"
               src="/logo/logo.svg"
               width="28"
             />
-            <h1 className="hidden text-sm font-medium sm:block">Nore OG</h1>
+            <h1 className="hidden text-sm font-medium sm:block">Placard</h1>
           </div>
           <nav
             aria-label={copy.navigationLabel}

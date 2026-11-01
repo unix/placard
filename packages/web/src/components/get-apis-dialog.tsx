@@ -45,7 +45,7 @@ const getApisDialogLocales = {
     dialogTitle: 'Get APIs',
     format: 'Code',
     hostNotice:
-      'This API host is for demonstration only, with no availability guarantee. Self-host Nore OG and use your own API address for integrations.',
+      'This API host is for demonstration only, with no availability guarantee. Self-host Placard and use your own API address for integrations.',
     hostNoticeTitle: 'Demo API',
     selfHost: 'Self-hosting guide',
   },
@@ -60,7 +60,7 @@ const getApisDialogLocales = {
     dialogTitle: 'Get APIs',
     format: '代码',
     hostNotice:
-      '当前 API Host 仅用于演示，不保证可用性。请自部署 Nore OG，并使用自己的 API 地址接入。',
+      '当前 API Host 仅用于演示，不保证可用性。请自部署 Placard，并使用自己的 API 地址接入。',
     hostNoticeTitle: '演示 API',
     selfHost: '自部署指南',
   },
@@ -197,7 +197,7 @@ const curlSnippet = (
   --header 'Accept: image/svg+xml' \\
   --header 'Content-Type: application/json' \\
   --data '${shellSingleQuoted(requestJson(parameters))}' \\
-  --output open-graph.svg`
+  --output placard.svg`
 
 const fetchSnippet = (
   parameters: Readonly<Record<string, ApiParameterValue>>,

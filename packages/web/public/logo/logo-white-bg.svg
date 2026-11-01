@@ -5,16 +5,11 @@
   fill="none"
   xmlns="http://www.w3.org/2000/svg">
   <rect width="64" height="64" rx="14" fill="#ffffff" />
-  <g transform="translate(9 8.5) scale(.75)" fill="#09090b">
-    <rect x="7" y="10" width="15" height="44" rx="7.5" />
-    <rect x="31" y="10" width="15" height="44" rx="7.5" />
-    <rect
-      x="19"
-      y="17"
-      width="15"
-      height="38"
-      rx="7.5"
-      transform="rotate(-31 19 17)" />
-    <circle cx="55" cy="18" r="6" />
-  </g>
+  <rect x="12" y="12" width="40" height="30" rx="6" fill="#09090b" />
+  <rect x="29" y="39" width="6" height="15" rx="3" fill="#09090b" />
+  <path
+    d="M21 23H43M21 31H37"
+    stroke="#ffffff"
+    stroke-width="4"
+    stroke-linecap="round" />
 </svg>

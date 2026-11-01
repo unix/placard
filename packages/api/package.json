@@ -1,5 +1,5 @@
 {
-  "name": "@norehq/open-graph-api",
+  "name": "@unix/placard-api",
   "version": "0.0.0",
   "private": true,
   "files": [

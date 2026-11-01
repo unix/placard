@@ -27,8 +27,13 @@ const {
   title,
 } = Astro.props
 
-const canonicalUrl = new URL(Astro.url.pathname, 'https://og.nore.sh')
-const openGraphImageUrl = 'https://og.nore.sh/logo/og.png'
+const siteUrl = import.meta.env.PUBLIC_SITE_URL?.trim()
+const canonicalUrl = siteUrl
+  ? new URL(Astro.url.pathname, siteUrl)
+  : undefined
+const openGraphImageUrl = siteUrl
+  ? new URL('/logo/og.png', siteUrl)
+  : undefined
 ---
 
 <!doctype html>
@@ -37,27 +42,39 @@ const openGraphImageUrl = 'https://og.nore.sh/logo/og.png'
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
-    <link rel="canonical" href={canonicalUrl} />
+    {canonicalUrl ? <link rel="canonical" href={canonicalUrl} /> : null}
     <link rel="icon" type="image/svg+xml" href="/logo/logo.svg" />
     <meta name="theme-color" content="#ffffff" />
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Nore OG" />
+    <meta property="og:site_name" content="Placard" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalUrl} />
+    {canonicalUrl ? <meta property="og:url" content={canonicalUrl} /> : null}
     <meta property="og:locale" content={openGraphLocale} />
     <meta property="og:locale:alternate" content={alternateOpenGraphLocale} />
-    <meta property="og:image" content={openGraphImageUrl} />
-    <meta property="og:image:secure_url" content={openGraphImageUrl} />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="675" />
-    <meta property="og:image:alt" content={imageAlt} />
+    {
+      openGraphImageUrl ? (
+        <>
+          <meta property="og:image" content={openGraphImageUrl} />
+          <meta property="og:image:secure_url" content={openGraphImageUrl} />
+          <meta property="og:image:type" content="image/png" />
+          <meta property="og:image:width" content="1200" />
+          <meta property="og:image:height" content="675" />
+          <meta property="og:image:alt" content={imageAlt} />
+        </>
+      ) : null
+    }
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={openGraphImageUrl} />
-    <meta name="twitter:image:alt" content={imageAlt} />
+    {
+      openGraphImageUrl ? (
+        <>
+          <meta name="twitter:image" content={openGraphImageUrl} />
+          <meta name="twitter:image:alt" content={imageAlt} />
+        </>
+      ) : null
+    }
     <ThemeInit />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>

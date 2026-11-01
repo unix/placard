@@ -81,10 +81,10 @@ jobs:
           flavor: latest=false
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           labels: |
-            org.opencontainers.image.description=Server-side Open Graph image generator
+            org.opencontainers.image.description=Open-source social image renderer
             org.opencontainers.image.licenses=MIT
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
-            org.opencontainers.image.title=Nore OG
+            org.opencontainers.image.title=Placard
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest

@@ -14,7 +14,7 @@ const GitHubLink = ({ locale }: GitHubLinkProps) => {
     <a
       aria-label={label}
       className="rounded-md px-2.5 py-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-      href="https://github.com/norehq/og"
+      href="https://github.com/unix/placard"
       rel="noopener noreferrer"
       target="_blank"
       title={label}>

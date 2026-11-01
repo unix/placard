@@ -1,5 +1,5 @@
 {
-  "name": "@norehq/open-graph-web",
+  "name": "@unix/placard-web",
   "type": "module",
   "version": "0.0.1",
   "engines": {

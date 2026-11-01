@@ -12,7 +12,7 @@ interface ClientDatabaseSchema extends DBSchema {
   }
 }
 
-const DATABASE_NAME = 'nore-open-graph-client-storage'
+const DATABASE_NAME = 'placard-client-storage'
 const DATABASE_VERSION = 1
 const DATABASE_TIMEOUT_MS = 500
 const DATABASE_TIMEOUT = Symbol('database-timeout')

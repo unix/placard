@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-readonly image='ghcr.io/norehq/og'
+readonly image='ghcr.io/unix/placard'
 readonly local_build_marker='container-build: local'
-readonly source_url='https://github.com/norehq/og'
+readonly source_url='https://github.com/unix/placard'
 
 usage() {
   printf 'Usage: pnpm release:container <version> [--local-image]\n' >&2
@@ -80,18 +80,18 @@ if [[ "${mode}" == '--local-image' ]]; then
 
   docker buildx build \
     --annotation "index,manifest:org.opencontainers.image.created=${created}" \
-    --annotation 'index,manifest:org.opencontainers.image.description=Server-side Open Graph image generator' \
+    --annotation 'index,manifest:org.opencontainers.image.description=Open-source social image renderer' \
     --annotation 'index,manifest:org.opencontainers.image.licenses=MIT' \
     --annotation "index,manifest:org.opencontainers.image.revision=${revision}" \
     --annotation "index,manifest:org.opencontainers.image.source=${source_url}" \
-    --annotation 'index,manifest:org.opencontainers.image.title=Nore OG' \
+    --annotation 'index,manifest:org.opencontainers.image.title=Placard' \
     --annotation "index,manifest:org.opencontainers.image.version=${version}" \
     --label "org.opencontainers.image.created=${created}" \
-    --label 'org.opencontainers.image.description=Server-side Open Graph image generator' \
+    --label 'org.opencontainers.image.description=Open-source social image renderer' \
     --label 'org.opencontainers.image.licenses=MIT' \
     --label "org.opencontainers.image.revision=${revision}" \
     --label "org.opencontainers.image.source=${source_url}" \
-    --label 'org.opencontainers.image.title=Nore OG' \
+    --label 'org.opencontainers.image.title=Placard' \
     --label "org.opencontainers.image.version=${version}" \
     --platform linux/amd64,linux/arm64 \
     --provenance=mode=max \
