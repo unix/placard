@@ -17,6 +17,23 @@ It includes a web interface for composing and previewing cards, plus an HTTP API
 - [Documentation, API reference, and self-hosting guide](https://og.nore.sh/intro)
 - [中文文档、API 参考与自部署指南](https://og.nore.sh/zh/intro)
 
+## Container releases
+
+Stable container images are published to the GitHub Container Registry when a SemVer tag is pushed. For example, pushing `v0.1.0` publishes both `ghcr.io/norehq/og:0.1.0` and `ghcr.io/norehq/og:latest` for Linux AMD64 and ARM64.
+
+```sh
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Use an exact version in production so deployments do not change unexpectedly:
+
+```sh
+docker run --rm -p 3003:3003 ghcr.io/norehq/og:0.1.0
+```
+
+GitHub creates the package as private on its first publish. After the first successful release, an organization owner must change its visibility to public once in the package settings. Later releases remain public automatically.
+
 ## License
 
 [MIT](LICENSE)
