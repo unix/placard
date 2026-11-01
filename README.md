@@ -1,70 +1,22 @@
 # Nore OG
 
-A pnpm workspace for self-hosted Open Graph image rendering by Nore.
+Nore OG is a server-side Open Graph image generator for creating consistent, branded cards automatically and at scale. Choose a template, add your content, then export an SVG or PNG image for a blog post, product page, release note, or any other shareable link.
 
-- `packages/api`: Node.js + Takumi HTTP API with SVG and PNG output.
-- `packages/web`: Astro + React template gallery, deployed to Cloudflare Workers by
-  default.
+It includes a web interface for composing and previewing cards, plus an HTTP API for automated generation. The web interface and API can also be self-hosted together with Docker.
 
-## Local development
+## Features
 
-```sh
-pnpm install
-pnpm dev:api
-pnpm dev:web
-```
+- Reusable templates with custom content and branding
+- SVG and PNG output
+- Web interface and HTTP API
+- Single-container self-hosting
 
-The API listens on `http://localhost:3003`. The web app reads that URL by default;
-set `PUBLIC_API_BASE_URL` when the API is hosted elsewhere.
+## Links
 
-## API
+- [Web app](https://og.nore.sh)
+- [Documentation, API reference, and self-hosting guide](https://og.nore.sh/intro)
+- [中文文档、API 参考与自部署指南](https://og.nore.sh/zh/intro)
 
-The API is public when `OG_INTERNAL_TOKEN` is unset or blank. When it is set, all
-render and template endpoints require `Authorization: Bearer <token>`. `/health`
-always remains public.
+## License
 
-```text
-GET  /health
-GET  /api/templates-minify
-GET  /api/templates
-GET  /render.svg
-GET  /render.png
-POST /api/render
-```
-
-Supported render fields are `template`, `title`, `description`, `author`, `date`,
-`brandName`, `logoId`, `logoUrl`, `maxTitleLength`, and `maxDescriptionLength`.
-Global render behavior fields are `canvasColor`, `canvasPadding`, `canvasRadius`,
-`contentRadius`, `seed`, and `lang`. `contentRadius` accepts a non-negative integer
-or `"auto"`; automatic mode uses `max(canvasRadius - canvasPadding, 0)`. The POST
-endpoint accepts the same fields plus `format: "svg" | "png"`.
-
-Invalid global render behavior falls back to the corresponding default without
-failing the request. Successful responses list any supplied invalid fields in the
-`X-Render-Fallback-Fields` response header. Omitted fields use their defaults and
-are not included in that header.
-
-## Web deployment
-
-The web package uses the Astro Cloudflare adapter and Wrangler. Deploy it to
-Cloudflare Workers from the workspace root:
-
-```sh
-pnpm deploy
-```
-
-Set `PUBLIC_API_BASE_URL` to the public API origin in the Cloudflare build
-environment.
-
-## Docker
-
-The default Dockerfile builds only the API. The web package is excluded from the
-Docker build context because it is deployed separately to Cloudflare Workers.
-
-```sh
-docker build -t open-graph-api .
-docker run --rm -p 3003:3003 open-graph-api
-```
-
-The Dockerfile has no architecture-specific download step and can be published for
-multiple platforms with Buildx.
+[MIT](LICENSE)
