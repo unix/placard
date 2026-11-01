@@ -229,6 +229,22 @@ test('exposes health and template metadata without a token by default', async ()
     assert.equal(templateDefaults.get('grid-hexagon'), inverseLogoId)
     assert.equal(templateDefaults.get('aurora-column'), inverseLogoId)
     assert.equal(templateDefaults.get('minimal'), defaultLogoId)
+    const minifiedResponse = await app.inject({
+      method: 'GET',
+      url: '/api/templates-minify',
+    })
+    assert.equal(minifiedResponse.statusCode, 200)
+    const minifiedTemplateDefaults = new Map(
+      minifiedResponse
+        .json()
+        .map((template: { defaultLogoId: string; id: string }) => [
+          template.id,
+          template.defaultLogoId,
+        ]),
+    )
+    assert.equal(minifiedTemplateDefaults.get('night'), inverseLogoId)
+    assert.equal(minifiedTemplateDefaults.get('minimal'), defaultLogoId)
+    assert.equal('fields' in minifiedResponse.json()[0], false)
     assert.deepEqual(
       response.json().renderBehavior.defaults,
       defaultGlobalRenderBehavior,

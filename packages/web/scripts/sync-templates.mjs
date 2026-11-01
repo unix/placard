@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path'
 import { loadEnvFile } from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-const schemaVersion = 1
+const schemaVersion = 2
 const defaultApiBaseUrl = 'http://localhost:3003'
 const defaultConcurrency = 8
 const requestTimeoutMs = 15_000
@@ -134,7 +134,6 @@ const thumbnailPath = templateId => {
     brandName: 'Placard',
     date: '2026-08-22',
     description: 'An open-source social image renderer.',
-    logoId: 'nore-dark',
     seed: 'catalog-preview',
     template: templateId,
     title: 'Make every shared link unmistakably yours.',

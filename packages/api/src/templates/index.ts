@@ -53,11 +53,14 @@ export const templateOptions = templates.map(
   }),
 )
 
-export const templateMinifyOptions = templates.map(({ description, id, name }) => ({
-  description,
-  id,
-  name,
-}))
+export const templateMinifyOptions = templateOptions.map(
+  ({ defaultLogoId, description, id, name }) => ({
+    defaultLogoId,
+    description,
+    id,
+    name,
+  }),
+)
 
 const fallbackTemplate =
   templates.find(template => template.id === defaultTemplateId) ?? templates[0]
