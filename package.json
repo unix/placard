@@ -8,6 +8,7 @@
     "build": "pnpm -r --if-present build",
     "check": "pnpm format:check && pnpm -r --if-present typecheck && pnpm -r --if-present test",
     "release:cf": "pnpm --filter @norehq/open-graph-web run release:cf",
+    "release:container": "bash ./scripts/release-container.sh",
     "sync": "pnpm --filter @norehq/open-graph-web run sync",
     "dev": "pnpm --parallel --filter @norehq/open-graph-api --filter @norehq/open-graph-web dev",
     "dev:api": "pnpm --filter @norehq/open-graph-api dev",

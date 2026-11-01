@@ -19,11 +19,19 @@ It includes a web interface for composing and previewing cards, plus an HTTP API
 
 ## Container releases
 
-Stable container images are published to the GitHub Container Registry when a SemVer tag is pushed. For example, pushing `v0.1.0` publishes both `ghcr.io/norehq/og:0.1.0` and `ghcr.io/norehq/og:latest` for Linux AMD64 and ARM64.
+Stable container images are published publicly to the GitHub Container Registry for Linux AMD64 and ARM64. Every release publishes an exact version and updates `latest` to the same image digest.
+
+The standard release command creates and pushes an annotated SemVer tag, creates a GitHub Release, and waits for GitHub Actions to build the image:
 
 ```sh
-git tag v0.1.0
-git push origin v0.1.0
+pnpm release:container 0.2.0
+```
+
+On a trusted development machine that is already authenticated to `ghcr.io`, the image can instead be built and pushed locally. The release tag records this choice so GitHub Actions verifies the published manifest and skips its duplicate image build:
+
+```sh
+docker login ghcr.io
+pnpm release:container 0.2.0 --local-image
 ```
 
 Use an exact version in production so deployments do not change unexpectedly:
@@ -31,8 +39,6 @@ Use an exact version in production so deployments do not change unexpectedly:
 ```sh
 docker run --rm -p 3003:3003 ghcr.io/norehq/og:0.1.0
 ```
-
-GitHub creates the package as private on its first publish. After the first successful release, an organization owner must change its visibility to public once in the package settings. Later releases remain public automatically.
 
 ## License
 
